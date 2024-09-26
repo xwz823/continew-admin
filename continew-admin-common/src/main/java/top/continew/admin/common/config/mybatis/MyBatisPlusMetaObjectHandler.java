@@ -51,6 +51,8 @@ public class MyBatisPlusMetaObjectHandler implements MetaObjectHandler {
      */
     private static final String UPDATE_TIME = "updateTime";
 
+    /* 删除标识 **/
+    private static final String IS_DELETED = "isDeleted";
     /**
      * 插入数据时填充
      *
@@ -73,6 +75,7 @@ public class MyBatisPlusMetaObjectHandler implements MetaObjectHandler {
                 this.fillFieldValue(metaObject, CREATE_USER, createUser, false);
                 this.fillFieldValue(metaObject, CREATE_TIME, createTime, false);
             }
+            this.fillFieldValue(metaObject, IS_DELETED, 0, false);
         } catch (Exception e) {
             throw new BusinessException("插入数据时自动填充异常：" + e.getMessage());
         }

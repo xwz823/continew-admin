@@ -29,6 +29,7 @@
         <module>continew-admin-system</module>
         <module>continew-admin-common</module>
         <module>continew-admin-extension</module>
+        <module>continew-admin-cms</module>
     </modules>
 
     <properties>
@@ -73,6 +74,13 @@
                 <artifactId>continew-admin-generator</artifactId>
                 <version>${revision}</version>
             </dependency>
+
+            <!-- 代码生成器插件（后续会改造为独立插件） -->
+            <dependency>
+                <groupId>top.continew</groupId>
+                <artifactId>continew-admin-cms</artifactId>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -82,7 +90,6 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
         </dependency>
-
         <!-- Lombok（在 Java 开发过程中用注解的方式，简化了 JavaBean 的编写，避免了冗余和样板式代码，让编写的类更加简洁） -->
         <dependency>
             <groupId>org.projectlombok</groupId>

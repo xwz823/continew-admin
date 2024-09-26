@@ -50,6 +50,12 @@
             <artifactId>continew-admin-generator</artifactId>
         </dependency>
 
+        <!-- 内容管理 -->
+        <dependency>
+            <groupId>top.continew</groupId>
+            <artifactId>continew-admin-cms</artifactId>
+        </dependency>
+
         <!-- Liquibase（用于管理数据库版本，跟踪、管理和应用数据库变化） -->
         <dependency>
             <groupId>org.liquibase</groupId>
