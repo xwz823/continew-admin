@@ -59,6 +59,13 @@ public class SiteInfoReq extends BaseReq {
     private String bindDomain;
 
     /**
+     * 二级目录
+     */
+    @Schema(description = "二级目录")
+    @Length(max = 128, message = "二级目录长度不能超过 {max} 个字符")
+    private String bindPath;
+
+    /**
      * 绑定语言
      */
     @Schema(description = "绑定语言")
