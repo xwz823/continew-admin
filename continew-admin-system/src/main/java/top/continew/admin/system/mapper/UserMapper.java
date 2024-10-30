@@ -23,7 +23,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import top.continew.admin.common.config.mybatis.DataPermissionMapper;
 import top.continew.admin.system.model.entity.UserDO;
-import top.continew.admin.system.model.resp.UserDetailResp;
+import top.continew.admin.system.model.resp.user.UserDetailResp;
 import top.continew.starter.extension.datapermission.annotation.DataPermission;
 import top.continew.starter.security.crypto.annotation.FieldEncrypt;
 

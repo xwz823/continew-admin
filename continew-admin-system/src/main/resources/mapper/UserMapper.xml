@@ -26,12 +26,12 @@
         LEFT JOIN sys_dept AS t2 ON t2.id = t1.dept_id
     </sql>
 
-    <select id="selectUserPage" resultType="top.continew.admin.system.model.resp.UserDetailResp">
+    <select id="selectUserPage" resultType="top.continew.admin.system.model.resp.user.UserDetailResp">
         <include refid="selectUser" />
         ${ew.customSqlSegment}
     </select>
 
-    <select id="selectUserList" resultType="top.continew.admin.system.model.resp.UserDetailResp">
+    <select id="selectUserList" resultType="top.continew.admin.system.model.resp.user.UserDetailResp">
         <include refid="selectUser" />
         ${ew.customSqlSegment}
     </select>

@@ -44,6 +44,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.ahoo.cosid.IdGenerator;
 import me.ahoo.cosid.provider.DefaultIdGeneratorProvider;
 import net.dreamlu.mica.core.result.R;
@@ -66,11 +67,11 @@ import top.continew.admin.system.model.entity.RoleDO;
 import top.continew.admin.system.model.entity.UserDO;
 import top.continew.admin.system.model.entity.UserRoleDO;
 import top.continew.admin.system.model.query.UserQuery;
-import top.continew.admin.system.model.req.*;
-import top.continew.admin.system.model.resp.UserDetailResp;
-import top.continew.admin.system.model.resp.UserImportParseResp;
-import top.continew.admin.system.model.resp.UserImportResp;
-import top.continew.admin.system.model.resp.UserResp;
+import top.continew.admin.system.model.req.user.*;
+import top.continew.admin.system.model.resp.user.UserDetailResp;
+import top.continew.admin.system.model.resp.user.UserImportParseResp;
+import top.continew.admin.system.model.resp.user.UserImportResp;
+import top.continew.admin.system.model.resp.user.UserResp;
 import top.continew.admin.system.service.*;
 import top.continew.starter.cache.redisson.util.RedisUtils;
 import top.continew.starter.core.constant.StringConstants;
@@ -99,6 +100,7 @@ import static top.continew.admin.system.enums.PasswordPolicyEnum.*;
  * @author Charles7c
  * @since 2022/12/21 21:49
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserResp, UserDetailResp, UserQuery, UserReq> implements UserService, CommonUserService {
@@ -134,6 +136,89 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
     }
 
     @Override
+    public void beforeAdd(UserReq req) {
+        final String errorMsgTemplate = "新增失败，[{}] 已存在";
+        String username = req.getUsername();
+        CheckUtils.throwIf(this.isNameExists(username, null), errorMsgTemplate, username);
+        String email = req.getEmail();
+        CheckUtils.throwIf(StrUtil.isNotBlank(email) && this.isEmailExists(email, null), errorMsgTemplate, email);
+        String phone = req.getPhone();
+        CheckUtils.throwIf(StrUtil.isNotBlank(phone) && this.isPhoneExists(phone, null), errorMsgTemplate, phone);
+    }
+
+    @Override
+    public void afterAdd(UserReq req, UserDO user) {
+        Long userId = user.getId();
+        baseMapper.lambdaUpdate().set(UserDO::getPwdResetTime, LocalDateTime.now()).eq(UserDO::getId, userId).update();
+        // 保存用户和角色关联
+        userRoleService.add(req.getRoleIds(), userId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheUpdate(key = "#id", value = "#req.nickname", name = CacheConstants.USER_KEY_PREFIX)
+    public void update(UserReq req, Long id) {
+        final String errorMsgTemplate = "修改失败，[{}] 已存在";
+        String username = req.getUsername();
+        CheckUtils.throwIf(this.isNameExists(username, id), errorMsgTemplate, username);
+        String email = req.getEmail();
+        CheckUtils.throwIf(StrUtil.isNotBlank(email) && this.isEmailExists(email, id), errorMsgTemplate, email);
+        String phone = req.getPhone();
+        CheckUtils.throwIf(StrUtil.isNotBlank(phone) && this.isPhoneExists(phone, id), errorMsgTemplate, phone);
+        DisEnableStatusEnum newStatus = req.getStatus();
+        CheckUtils.throwIf(DisEnableStatusEnum.DISABLE.equals(newStatus) && ObjectUtil.equal(id, UserContextHolder
+                .getUserId()), "不允许禁用当前用户");
+        UserDO oldUser = super.getById(id);
+        if (Boolean.TRUE.equals(oldUser.getIsSystem())) {
+            CheckUtils.throwIfEqual(DisEnableStatusEnum.DISABLE, newStatus, "[{}] 是系统内置用户，不允许禁用", oldUser
+                    .getNickname());
+            Collection<Long> disjunctionRoleIds = CollUtil.disjunction(req.getRoleIds(), userRoleService
+                    .listRoleIdByUserId(id));
+            CheckUtils.throwIfNotEmpty(disjunctionRoleIds, "[{}] 是系统内置用户，不允许变更角色", oldUser.getNickname());
+        }
+        // 更新信息
+        UserDO newUser = BeanUtil.toBean(req, UserDO.class);
+        newUser.setId(id);
+        baseMapper.updateById(newUser);
+        // 保存用户和角色关联
+        boolean isSaveUserRoleSuccess = userRoleService.add(req.getRoleIds(), id);
+        // 如果禁用用户，则踢出在线用户
+        if (DisEnableStatusEnum.DISABLE.equals(newStatus)) {
+            onlineUserService.kickOut(id);
+            return;
+        }
+        // 如果角色有变更，则更新在线用户权限信息
+        if (isSaveUserRoleSuccess) {
+            UserContext userContext = UserContextHolder.getContext(id);
+            if (null != userContext) {
+                userContext.setRoles(roleService.listByUserId(id));
+                userContext.setPermissions(roleService.listPermissionByUserId(id));
+                UserContextHolder.setContext(userContext);
+            }
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheInvalidate(key = "#ids", name = CacheConstants.USER_KEY_PREFIX, multi = true)
+    public void delete(List<Long> ids) {
+        CheckUtils.throwIf(CollUtil.contains(ids, UserContextHolder.getUserId()), "不允许删除当前用户");
+        List<UserDO> list = baseMapper.lambdaQuery()
+                .select(UserDO::getNickname, UserDO::getIsSystem)
+                .in(UserDO::getId, ids)
+                .list();
+        Optional<UserDO> isSystemData = list.stream().filter(UserDO::getIsSystem).findFirst();
+        CheckUtils.throwIf(isSystemData::isPresent, "所选用户 [{}] 是系统内置用户，不允许删除", isSystemData.orElseGet(UserDO::new)
+                .getNickname());
+        // 删除用户和角色关联
+        userRoleService.deleteByUserIds(ids);
+        // 删除历史密码
+        userPasswordHistoryService.deleteByUserIds(ids);
+        // 删除用户
+        super.delete(ids);
+    }
+
+    @Override
     public Long add(UserDO user) {
         user.setStatus(DisEnableStatusEnum.ENABLE);
         baseMapper.insert(user);
@@ -141,12 +226,12 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
     }
 
     @Override
-    public void downloadImportUserTemplate(HttpServletResponse response) throws IOException {
+    public void downloadImportTemplate(HttpServletResponse response) throws IOException {
         try {
             FileUploadUtils.download(response, ResourceUtil
-                .getStream("templates/import/userImportTemplate.xlsx"), "用户导入模板.xlsx");
+                .getStream("templates/import/user.xlsx"), "用户导入模板.xlsx");
         } catch (Exception e) {
-            log.error("下载用户导入模板失败：", e);
+            log.error("下载用户导入模板失败：{}", e.getMessage(), e);
             response.setCharacterEncoding(CharsetUtil.UTF_8);
             response.setContentType(ContentType.JSON.toString());
             response.getWriter().write(JSONUtil.toJsonStr(R.fail("下载用户导入模板失败")));
@@ -154,69 +239,64 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
     }
 
     @Override
-    public UserImportParseResp parseImportUser(MultipartFile file) {
+    public UserImportParseResp parseImport(MultipartFile file) {
         UserImportParseResp userImportResp = new UserImportParseResp();
-        List<UserImportRowReq> userRowList;
+        List<UserImportRowReq> importRowList;
         // 读取表格数据
         try {
-            userRowList = EasyExcel.read(file.getInputStream())
+            importRowList = EasyExcel.read(file.getInputStream())
                 .head(UserImportRowReq.class)
                 .sheet()
                 .headRowNumber(1)
                 .doReadSync();
         } catch (Exception e) {
-            log.error("用户导入数据文件解析异常：", e);
+            log.error("用户导入数据文件解析异常：{}", e.getMessage(), e);
             throw new BusinessException("数据文件解析异常");
         }
-        userImportResp.setTotalRows(userRowList.size());
-        if (CollUtil.isEmpty(userRowList)) {
-            throw new BusinessException("数据文件格式错误");
-        }
-
-        // 过滤无效数据
-        List<UserImportRowReq> validUserRowList = filterErrorUserImportData(userRowList);
-        userImportResp.setValidRows(validUserRowList.size());
-        if (CollUtil.isEmpty(validUserRowList)) {
-            throw new BusinessException("数据文件格式错误");
-        }
+        // 总计行数
+        userImportResp.setTotalRows(importRowList.size());
+        CheckUtils.throwIfEmpty(importRowList, "数据文件格式错误");
+        // 有效行数：过滤无效数据
+        List<UserImportRowReq> validRowList = this.filterImportData(importRowList);
+        userImportResp.setValidRows(validRowList.size());
+        CheckUtils.throwIfEmpty(validRowList, "数据文件格式错误");
 
         // 检测表格内数据是否合法
         Set<String> seenEmails = new HashSet<>();
-        boolean hasDuplicateEmail = validUserRowList.stream()
+        boolean hasDuplicateEmail = validRowList.stream()
             .map(UserImportRowReq::getEmail)
             .anyMatch(email -> email != null && !seenEmails.add(email));
         CheckUtils.throwIf(hasDuplicateEmail, "存在重复邮箱，请检测数据");
         Set<String> seenPhones = new HashSet<>();
-        boolean hasDuplicatePhone = validUserRowList.stream()
+        boolean hasDuplicatePhone = validRowList.stream()
             .map(UserImportRowReq::getPhone)
             .anyMatch(phone -> phone != null && !seenPhones.add(phone));
         CheckUtils.throwIf(hasDuplicatePhone, "存在重复手机，请检测数据");
 
         // 校验是否存在错误角色
-        List<String> roleNames = validUserRowList.stream().map(UserImportRowReq::getRoleName).distinct().toList();
+        List<String> roleNames = validRowList.stream().map(UserImportRowReq::getRoleName).distinct().toList();
         int existRoleCount = roleService.countByNames(roleNames);
         CheckUtils.throwIf(existRoleCount < roleNames.size(), "存在错误角色，请检查数据");
         // 校验是否存在错误部门
-        List<String> deptNames = validUserRowList.stream().map(UserImportRowReq::getDeptName).distinct().toList();
+        List<String> deptNames = validRowList.stream().map(UserImportRowReq::getDeptName).distinct().toList();
         int existDeptCount = deptService.countByNames(deptNames);
         CheckUtils.throwIf(existDeptCount < deptNames.size(), "存在错误部门，请检查数据");
 
         // 查询重复用户
         userImportResp
-            .setDuplicateUserRows(countExistByField(validUserRowList, UserImportRowReq::getUsername, UserDO::getUsername, false));
+            .setDuplicateUserRows(countExistByField(validRowList, UserImportRowReq::getUsername, UserDO::getUsername, false));
         // 查询重复邮箱
         userImportResp
-            .setDuplicateEmailRows(countExistByField(validUserRowList, UserImportRowReq::getEmail, UserDO::getEmail, true));
+            .setDuplicateEmailRows(countExistByField(validRowList, UserImportRowReq::getEmail, UserDO::getEmail, true));
         // 查询重复手机
         userImportResp
-            .setDuplicatePhoneRows(countExistByField(validUserRowList, UserImportRowReq::getPhone, UserDO::getPhone, true));
+            .setDuplicatePhoneRows(countExistByField(validRowList, UserImportRowReq::getPhone, UserDO::getPhone, true));
 
         // 设置导入会话并缓存数据，有效期10分钟
         String importKey = UUID.fastUUID().toString(true);
-        RedisUtils.set(CacheConstants.DATA_IMPORT_KEY + importKey, JSONUtil.toJsonStr(validUserRowList), Duration
+        RedisUtils.set(CacheConstants.DATA_IMPORT_KEY + importKey, JSONUtil.toJsonStr(validRowList), Duration
             .ofMinutes(10));
         userImportResp.setImportKey(importKey);
-
         return userImportResp;
     }
 
@@ -290,7 +370,6 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
         return new UserImportResp(insertList.size() + updateList.size(), insertList.size(), updateList.size());
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public void doImportUser(List<UserDO> insertList, List<UserDO> updateList, List<UserRoleDO> userRoleDOList) {
         if (CollUtil.isNotEmpty(insertList)) {
             baseMapper.insert(insertList);
@@ -302,70 +381,6 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
         if (CollUtil.isNotEmpty(userRoleDOList)) {
             userRoleService.saveBatch(userRoleDOList);
         }
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    @CacheUpdate(key = "#id", value = "#req.nickname", name = CacheConstants.USER_KEY_PREFIX)
-    public void update(UserReq req, Long id) {
-        final String errorMsgTemplate = "修改失败，[{}] 已存在";
-        String username = req.getUsername();
-        CheckUtils.throwIf(this.isNameExists(username, id), errorMsgTemplate, username);
-        String email = req.getEmail();
-        CheckUtils.throwIf(StrUtil.isNotBlank(email) && this.isEmailExists(email, id), errorMsgTemplate, email);
-        String phone = req.getPhone();
-        CheckUtils.throwIf(StrUtil.isNotBlank(phone) && this.isPhoneExists(phone, id), errorMsgTemplate, phone);
-        DisEnableStatusEnum newStatus = req.getStatus();
-        CheckUtils.throwIf(DisEnableStatusEnum.DISABLE.equals(newStatus) && ObjectUtil.equal(id, UserContextHolder
-            .getUserId()), "不允许禁用当前用户");
-        UserDO oldUser = super.getById(id);
-        if (Boolean.TRUE.equals(oldUser.getIsSystem())) {
-            CheckUtils.throwIfEqual(DisEnableStatusEnum.DISABLE, newStatus, "[{}] 是系统内置用户，不允许禁用", oldUser
-                .getNickname());
-            Collection<Long> disjunctionRoleIds = CollUtil.disjunction(req.getRoleIds(), userRoleService
-                .listRoleIdByUserId(id));
-            CheckUtils.throwIfNotEmpty(disjunctionRoleIds, "[{}] 是系统内置用户，不允许变更角色", oldUser.getNickname());
-        }
-        // 更新信息
-        UserDO newUser = BeanUtil.toBean(req, UserDO.class);
-        newUser.setId(id);
-        baseMapper.updateById(newUser);
-        // 保存用户和角色关联
-        boolean isSaveUserRoleSuccess = userRoleService.add(req.getRoleIds(), id);
-        // 如果禁用用户，则踢出在线用户
-        if (DisEnableStatusEnum.DISABLE.equals(newStatus)) {
-            onlineUserService.kickOut(id);
-            return;
-        }
-        // 如果角色有变更，则更新在线用户权限信息
-        if (isSaveUserRoleSuccess) {
-            UserContext userContext = UserContextHolder.getContext(id);
-            if (null != userContext) {
-                userContext.setRoles(roleService.listByUserId(id));
-                userContext.setPermissions(roleService.listPermissionByUserId(id));
-                UserContextHolder.setContext(userContext);
-            }
-        }
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    @CacheInvalidate(key = "#ids", name = CacheConstants.USER_KEY_PREFIX, multi = true)
-    public void delete(List<Long> ids) {
-        CheckUtils.throwIf(CollUtil.contains(ids, UserContextHolder.getUserId()), "不允许删除当前用户");
-        List<UserDO> list = baseMapper.lambdaQuery()
-            .select(UserDO::getNickname, UserDO::getIsSystem)
-            .in(UserDO::getId, ids)
-            .list();
-        Optional<UserDO> isSystemData = list.stream().filter(UserDO::getIsSystem).findFirst();
-        CheckUtils.throwIf(isSystemData::isPresent, "所选用户 [{}] 是系统内置用户，不允许删除", isSystemData.orElseGet(UserDO::new)
-            .getNickname());
-        // 删除用户和角色关联
-        userRoleService.deleteByUserIds(ids);
-        // 删除历史密码
-        userPasswordHistoryService.deleteByUserIds(ids);
-        // 删除用户
-        super.delete(ids);
     }
 
     @Override
@@ -515,25 +530,6 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
             .in(CollUtil.isNotEmpty(userIdList), "t1.id", userIdList);
     }
 
-    @Override
-    protected void beforeAdd(UserReq req) {
-        final String errorMsgTemplate = "新增失败，[{}] 已存在";
-        String username = req.getUsername();
-        CheckUtils.throwIf(this.isNameExists(username, null), errorMsgTemplate, username);
-        String email = req.getEmail();
-        CheckUtils.throwIf(StrUtil.isNotBlank(email) && this.isEmailExists(email, null), errorMsgTemplate, email);
-        String phone = req.getPhone();
-        CheckUtils.throwIf(StrUtil.isNotBlank(phone) && this.isPhoneExists(phone, null), errorMsgTemplate, phone);
-    }
-
-    @Override
-    protected void afterAdd(UserReq req, UserDO user) {
-        Long userId = user.getId();
-        baseMapper.lambdaUpdate().set(UserDO::getPwdResetTime, LocalDateTime.now()).eq(UserDO::getId, userId).update();
-        // 保存用户和角色关联
-        userRoleService.add(req.getRoleIds(), userId);
-    }
-
     /**
      * 判断是否跳过导入
      *
@@ -617,12 +613,14 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
     }
 
     /**
-     * 过滤无效的导入用户数据,批量导入不严格校验数据
+     * 过滤无效的导入用户数据（批量导入不严格校验数据）
+     *
+     * @param importRowList 导入数据
      */
-    private List<UserImportRowReq> filterErrorUserImportData(List<UserImportRowReq> userImportList) {
+    private List<UserImportRowReq> filterImportData(List<UserImportRowReq> importRowList) {
         // 校验过滤
-        List<UserImportRowReq> list = userImportList.stream()
-            .filter(row -> ValidationUtil.validate(row).size() == 0)
+        List<UserImportRowReq> list = importRowList.stream()
+            .filter(row -> ValidationUtil.validate(row).isEmpty())
             .toList();
         // 用户名去重
         return list.stream()

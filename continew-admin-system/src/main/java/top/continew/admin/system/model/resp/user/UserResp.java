@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package top.continew.admin.system.model.resp;
+package top.continew.admin.system.model.resp.user;
 
 import cn.crane4j.annotation.Assemble;
 import cn.crane4j.core.executor.handler.ManyToManyAssembleOperationHandler;

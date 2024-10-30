@@ -20,11 +20,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 import top.continew.admin.system.model.entity.UserDO;
 import top.continew.admin.system.model.query.UserQuery;
-import top.continew.admin.system.model.req.*;
-import top.continew.admin.system.model.resp.UserDetailResp;
-import top.continew.admin.system.model.resp.UserImportParseResp;
-import top.continew.admin.system.model.resp.UserImportResp;
-import top.continew.admin.system.model.resp.UserResp;
+import top.continew.admin.system.model.req.user.*;
+import top.continew.admin.system.model.resp.user.UserDetailResp;
+import top.continew.admin.system.model.resp.user.UserImportParseResp;
+import top.continew.admin.system.model.resp.user.UserImportResp;
+import top.continew.admin.system.model.resp.user.UserResp;
 import top.continew.starter.data.mp.service.IService;
 import top.continew.starter.extension.crud.service.BaseService;
 
@@ -46,6 +46,30 @@ public interface UserService extends BaseService<UserResp, UserDetailResp, UserQ
      * @return ID
      */
     Long add(UserDO user);
+
+    /**
+     * 下载导入模板
+     *
+     * @param response 响应对象
+     * @throws IOException /
+     */
+    void downloadImportTemplate(HttpServletResponse response) throws IOException;
+
+    /**
+     * 解析导入数据
+     *
+     * @param file 导入文件
+     * @return 解析结果
+     */
+    UserImportParseResp parseImport(MultipartFile file);
+
+    /**
+     * 导入数据
+     *
+     * @param req 导入信息
+     * @return 导入结果
+     */
+    UserImportResp importUser(UserImportReq req);
 
     /**
      * 重置密码
@@ -139,28 +163,4 @@ public interface UserService extends BaseService<UserResp, UserDetailResp, UserQ
      * @return 用户数量
      */
     Long countByDeptIds(List<Long> deptIds);
-
-    /**
-     * 下载用户导入模板
-     *
-     * @param response 响应对象
-     * @throws IOException /
-     */
-    void downloadImportUserTemplate(HttpServletResponse response) throws IOException;
-
-    /**
-     * 导入用户
-     *
-     * @param req 导入信息
-     * @return 导入结果
-     */
-    UserImportResp importUser(UserImportReq req);
-
-    /**
-     * 解析用户导入数据
-     *
-     * @param file 导入用户文件
-     * @return 解析结果
-     */
-    UserImportParseResp parseImportUser(MultipartFile file);
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package top.continew.admin.system.model.resp;
+package top.continew.admin.system.model.resp.user;
 
 import cn.crane4j.annotation.Assemble;
 import cn.crane4j.annotation.AssembleMethod;
@@ -30,6 +30,7 @@ import top.continew.admin.common.constant.ContainerConstants;
 import top.continew.admin.common.context.UserContextHolder;
 import top.continew.admin.common.enums.DisEnableStatusEnum;
 import top.continew.admin.common.enums.GenderEnum;
+import top.continew.admin.system.model.resp.DeptResp;
 import top.continew.admin.system.service.DeptService;
 import top.continew.starter.extension.crud.model.resp.BaseDetailResp;
 import top.continew.starter.file.excel.converter.ExcelBaseEnumConverter;

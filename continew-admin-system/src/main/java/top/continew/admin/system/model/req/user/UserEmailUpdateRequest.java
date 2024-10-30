@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package top.continew.admin.system.model.req;
+package top.continew.admin.system.model.req.user;
 
 import cn.hutool.core.lang.RegexPool;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,32 +27,32 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 用户手机号修改信息
+ * 用户邮箱修改信息
  *
  * @author Charles7c
- * @since 2023/10/27 20:11
+ * @since 2023/1/12 20:18
  */
 @Data
-@Schema(description = "用户手机号修改信息")
-public class UserPhoneUpdateReq implements Serializable {
+@Schema(description = "用户邮箱修改信息")
+public class UserEmailUpdateRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * 新手机号
+     * 新邮箱
      */
-    @Schema(description = "新手机号", example = "13811111111")
-    @NotBlank(message = "新手机号不能为空")
-    @Pattern(regexp = RegexPool.MOBILE, message = "手机号格式错误")
-    private String phone;
+    @Schema(description = "新邮箱", example = "123456789@qq.com")
+    @NotBlank(message = "新邮箱不能为空")
+    @Pattern(regexp = RegexPool.EMAIL, message = "邮箱格式错误")
+    private String email;
 
     /**
      * 验证码
      */
-    @Schema(description = "验证码", example = "8888")
+    @Schema(description = "验证码", example = "888888")
     @NotBlank(message = "验证码不能为空")
-    @Length(max = 4, message = "验证码非法")
+    @Length(max = 6, message = "验证码非法")
     private String captcha;
 
     /**

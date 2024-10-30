@@ -32,14 +32,14 @@ import org.springframework.web.multipart.MultipartFile;
 import top.continew.admin.common.constant.RegexConstants;
 import top.continew.admin.common.util.SecureUtils;
 import top.continew.admin.system.model.query.UserQuery;
-import top.continew.admin.system.model.req.UserImportReq;
-import top.continew.admin.system.model.req.UserPasswordResetReq;
-import top.continew.admin.system.model.req.UserReq;
-import top.continew.admin.system.model.req.UserRoleUpdateReq;
-import top.continew.admin.system.model.resp.UserDetailResp;
-import top.continew.admin.system.model.resp.UserImportParseResp;
-import top.continew.admin.system.model.resp.UserImportResp;
-import top.continew.admin.system.model.resp.UserResp;
+import top.continew.admin.system.model.req.user.UserImportReq;
+import top.continew.admin.system.model.req.user.UserPasswordResetReq;
+import top.continew.admin.system.model.req.user.UserReq;
+import top.continew.admin.system.model.req.user.UserRoleUpdateReq;
+import top.continew.admin.system.model.resp.user.UserDetailResp;
+import top.continew.admin.system.model.resp.user.UserImportParseResp;
+import top.continew.admin.system.model.resp.user.UserImportResp;
+import top.continew.admin.system.model.resp.user.UserResp;
 import top.continew.admin.system.service.UserService;
 import top.continew.starter.core.util.ExceptionUtils;
 import top.continew.starter.core.util.validate.ValidationUtils;
@@ -83,24 +83,24 @@ public class UserController extends BaseController<UserService, UserResp, UserDe
         return super.add(req);
     }
 
-    @Operation(summary = "下载用户导入模板", description = "下载用户导入模板")
+    @Operation(summary = "下载导入模板", description = "下载导入模板")
     @SaCheckPermission("system:user:import")
-    @GetMapping(value = "downloadImportUserTemplate", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public void downloadImportUserTemplate(HttpServletResponse response) throws IOException {
-        userService.downloadImportUserTemplate(response);
+    @GetMapping(value = "/import/template", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public void downloadImportTemplate(HttpServletResponse response) throws IOException {
+        userService.downloadImportTemplate(response);
     }
 
-    @Operation(summary = "解析用户导入数据", description = "解析用户导入数据")
+    @Operation(summary = "解析导入数据", description = "解析导入数据")
     @SaCheckPermission("system:user:import")
-    @PostMapping(value = "parseImportUser")
-    public UserImportParseResp parseImportUser(@NotNull(message = "文件不能为空") MultipartFile file) {
+    @PostMapping("/import/parse")
+    public UserImportParseResp parseImport(@NotNull(message = "文件不能为空") MultipartFile file) {
         ValidationUtils.throwIf(file::isEmpty, "文件不能为空");
-        return userService.parseImportUser(file);
+        return userService.parseImport(file);
     }
 
-    @Operation(summary = "导入用户", description = "导入用户")
+    @Operation(summary = "导入数据", description = "导入数据")
     @SaCheckPermission("system:user:import")
-    @PostMapping(value = "import")
+    @PostMapping(value = "/import")
     public UserImportResp importUser(@Validated @RequestBody UserImportReq req) {
         return userService.importUser(req);
     }

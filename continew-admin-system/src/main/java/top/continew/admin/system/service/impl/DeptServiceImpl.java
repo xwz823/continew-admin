@@ -34,7 +34,7 @@ import top.continew.admin.system.model.query.DeptQuery;
 import top.continew.admin.system.model.query.UserQuery;
 import top.continew.admin.system.model.req.DeptReq;
 import top.continew.admin.system.model.resp.DeptResp;
-import top.continew.admin.system.model.resp.UserResp;
+import top.continew.admin.system.model.resp.user.UserResp;
 import top.continew.admin.system.service.DeptService;
 import top.continew.admin.system.service.RoleDeptService;
 import top.continew.admin.system.service.UserService;

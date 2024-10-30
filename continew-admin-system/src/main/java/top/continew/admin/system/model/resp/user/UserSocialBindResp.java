@@ -14,32 +14,36 @@
  * limitations under the License.
  */
 
-package top.continew.admin.system.model.req;
+package top.continew.admin.system.model.resp.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 用户密码重置信息
+ * 第三方账号绑定信息
  *
  * @author Charles7c
- * @since 2024/2/2 22:50
+ * @since 2023/10/19 21:29
  */
 @Data
-@Schema(description = "用户密码重置信息")
-public class UserPasswordResetReq implements Serializable {
+@Schema(description = "第三方账号绑定信息")
+public class UserSocialBindResp implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * 新密码（加密）
+     * 来源
      */
-    @Schema(description = "新密码（加密）", example = "Gzc78825P5baH190lRuZFb9KJxRt/psN2jiyOMPoc5WRcCvneCwqDm3Q33BZY56EzyyVy7vQu7jQwYTK4j1+5w==")
-    @NotBlank(message = "新密码不能为空")
-    private String newPassword;
+    @Schema(description = "来源", example = "GITEE")
+    private String source;
+
+    /**
+     * 描述
+     */
+    @Schema(description = "描述", example = "码云")
+    private String description;
 }

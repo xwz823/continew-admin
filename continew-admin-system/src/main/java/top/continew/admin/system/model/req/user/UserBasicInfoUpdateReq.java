@@ -14,38 +14,44 @@
  * limitations under the License.
  */
 
-package top.continew.admin.system.model.req;
+package top.continew.admin.system.model.req.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import top.continew.admin.common.constant.RegexConstants;
+import top.continew.admin.common.enums.GenderEnum;
 
 import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 用户密码修改信息
+ * 用户基础信息修改信息
  *
  * @author Charles7c
- * @since 2023/1/9 23:28
+ * @since 2023/1/7 23:08
  */
 @Data
-@Schema(description = "用户密码修改信息")
-public class UserPasswordUpdateReq implements Serializable {
+@Schema(description = "用户基础信息修改信息")
+public class UserBasicInfoUpdateReq implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * 当前密码（加密）
+     * 昵称
      */
-    @Schema(description = "当前密码（加密）", example = "E7c72TH+LDxKTwavjM99W1MdI9Lljh79aPKiv3XB9MXcplhm7qJ1BJCj28yaflbdVbfc366klMtjLIWQGqb0qw==")
-    private String oldPassword;
+    @Schema(description = "昵称", example = "张三")
+    @NotBlank(message = "昵称不能为空")
+    @Pattern(regexp = RegexConstants.GENERAL_NAME, message = "昵称长度为 2-30 个字符，支持中文、字母、数字、下划线，短横线")
+    private String nickname;
 
     /**
-     * 新密码（加密）
+     * 性别
      */
-    @Schema(description = "新密码（加密）", example = "Gzc78825P5baH190lRuZFb9KJxRt/psN2jiyOMPoc5WRcCvneCwqDm3Q33BZY56EzyyVy7vQu7jQwYTK4j1+5w==")
-    @NotBlank(message = "新密码不能为空")
-    private String newPassword;
+    @Schema(description = "性别", example = "1")
+    @NotNull(message = "性别非法")
+    private GenderEnum gender;
 }

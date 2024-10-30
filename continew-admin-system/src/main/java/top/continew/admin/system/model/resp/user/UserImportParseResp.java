@@ -14,31 +14,35 @@
  * limitations under the License.
  */
 
-package top.continew.admin.system.model.resp;
+package top.continew.admin.system.model.resp.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
- * 用户导入结果
+ * 用户导入解析结果
  *
  * @author kils
- * @since 2024-06-18 14:37
+ * @since 2024/6/18 14:37
  */
 @Data
-@Schema(description = "用户导入结果")
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserImportParseResp {
+@Schema(description = "用户导入解析结果")
+public class UserImportParseResp implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * 导入会话KEY
+     * 导入会话 Key
      */
-    @Schema(description = "导入会话KEY", example = "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed")
+    @Schema(description = "导入会话Key", example = "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed")
     private String importKey;
 
     /**
@@ -54,9 +58,9 @@ public class UserImportParseResp {
     private Integer validRows;
 
     /**
-     * 用户重复行数
+     * 重复行数
      */
-    @Schema(description = "用户重复行数", example = "100")
+    @Schema(description = "重复行数", example = "100")
     private Integer duplicateUserRows;
 
     /**
