@@ -73,10 +73,10 @@ services:
     depends_on:
       - redis
       - mysql
-  job-server:
-    build: ./job-server
+  schedule-server:
+    build: schedule-server
     restart: always
-    container_name: continew-admin-job-server
+    container_name: continew-admin-schedule-server
     ports:
       - '18001:18001'
       - '1788:1788'
