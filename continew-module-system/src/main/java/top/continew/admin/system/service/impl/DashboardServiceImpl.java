@@ -17,9 +17,17 @@
 package top.continew.admin.system.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.*;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import top.continew.admin.system.mapper.LogMapper;
 import top.continew.admin.system.model.resp.dashboard.DashboardAccessTrendResp;
@@ -28,7 +36,9 @@ import top.continew.admin.system.model.resp.dashboard.DashboardNoticeResp;
 import top.continew.admin.system.model.resp.dashboard.DashboardOverviewCommonResp;
 import top.continew.admin.system.service.DashboardService;
 import top.continew.admin.system.service.NoticeService;
+import top.continew.starter.core.constant.StringConstants;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -79,6 +89,31 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
+    public List<DashboardChartCommonResp> getAnalysisGeo() throws IOException {
+        List<DashboardChartCommonResp> originList = logMapper.selectListDashboardAnalysisGeo();
+        List<DashboardChartCommonResp> list = new ArrayList<>(34);
+        // 获取省份数据
+        String chinaJson = IoUtil.readUtf8(new ClassPathResource("china.json").getInputStream());
+        JSONArray jsonArr = JSONUtil.parseObj(chinaJson).getJSONArray("children");
+        List<String> provinceList = jsonArr.stream().map(item -> {
+            JSONObject itemJsonObj = JSONUtil.parseObj(item);
+            return "%s:%s".formatted(itemJsonObj.getStr("name"), itemJsonObj.getStr("fullname"));
+        }).toList();
+        // 汇总各省份访问数据
+        for (String province : provinceList) {
+            String[] split = province.split(StringConstants.COLON);
+            String name = split[0];
+            String fullName = split[1];
+            long sum = originList.stream()
+                .filter(item -> item.getName().contains(name))
+                .mapToLong(DashboardChartCommonResp::getValue)
+                .sum();
+            list.add(new DashboardChartCommonResp(fullName, sum));
+        }
+        return list;
+    }
+
+    @Override
     public List<DashboardAccessTrendResp> listAccessTrend(Integer days) {
         DateTime currentDate = DateUtil.date();
         Date startTime = DateUtil.beginOfDay(DateUtil.offsetDay(currentDate, -days)).toJdkDate();
@@ -111,12 +146,6 @@ public class DashboardServiceImpl implements DashboardService {
             this.fillMissingDateData(allTimeSlotList, list);
         }
         return list;
-    }
-
-    @Override
-    public List<DashboardChartCommonResp> getAnalysisGeo() {
-        List<DashboardChartCommonResp> list = logMapper.selectListDashboardAnalysisGeo(9);
-        return this.buildOtherPieChartData(list);
     }
 
     @Override

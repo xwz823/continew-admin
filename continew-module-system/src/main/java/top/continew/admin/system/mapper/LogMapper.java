@@ -100,6 +100,13 @@ public interface LogMapper extends BaseMapper<LogDO> {
     List<DashboardChartCommonResp> selectListDashboardAnalysisIp(@Param("months") List<String> months);
 
     /**
+     * 查询仪表盘地域分析信息
+     *
+     * @return 仪表盘地域分析信息
+     */
+    List<DashboardChartCommonResp> selectListDashboardAnalysisGeo();
+
+    /**
      * 查询仪表盘访问趋势信息
      *
      * @param startTime 开始时间
@@ -115,14 +122,6 @@ public interface LogMapper extends BaseMapper<LogDO> {
      * @return 仪表盘访问时段分析信息
      */
     List<DashboardChartCommonResp> selectListDashboardAnalysisTimeslot();
-
-    /**
-     * 查询仪表盘地域分析信息
-     *
-     * @param top 显示数量
-     * @return 仪表盘地域分析信息
-     */
-    List<DashboardChartCommonResp> selectListDashboardAnalysisGeo(@Param("top") Integer top);
 
     /**
      * 查询仪表盘模块分析信息

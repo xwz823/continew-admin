@@ -16,8 +16,12 @@
 
 package top.continew.admin.system.service;
 
-import top.continew.admin.system.model.resp.dashboard.*;
+import top.continew.admin.system.model.resp.dashboard.DashboardAccessTrendResp;
+import top.continew.admin.system.model.resp.dashboard.DashboardChartCommonResp;
+import top.continew.admin.system.model.resp.dashboard.DashboardNoticeResp;
+import top.continew.admin.system.model.resp.dashboard.DashboardOverviewCommonResp;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -50,6 +54,14 @@ public interface DashboardService {
     DashboardOverviewCommonResp getOverviewIp();
 
     /**
+     * 查询地域分析信息
+     *
+     * @return 地域分析信息
+     * @throws IOException /
+     */
+    List<DashboardChartCommonResp> getAnalysisGeo() throws IOException;
+
+    /**
      * 查询访问趋势信息
      *
      * @param days 日期数
@@ -63,13 +75,6 @@ public interface DashboardService {
      * @return 访问时段分析信息
      */
     List<DashboardChartCommonResp> getAnalysisTimeslot();
-
-    /**
-     * 查询地域分析信息
-     *
-     * @return 地域分析信息
-     */
-    List<DashboardChartCommonResp> getAnalysisGeo();
 
     /**
      * 查询模块分析信息

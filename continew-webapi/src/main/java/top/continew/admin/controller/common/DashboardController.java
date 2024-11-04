@@ -31,11 +31,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.continew.admin.common.constant.CacheConstants;
-import top.continew.admin.system.model.resp.dashboard.*;
+import top.continew.admin.system.model.resp.dashboard.DashboardAccessTrendResp;
+import top.continew.admin.system.model.resp.dashboard.DashboardChartCommonResp;
+import top.continew.admin.system.model.resp.dashboard.DashboardNoticeResp;
+import top.continew.admin.system.model.resp.dashboard.DashboardOverviewCommonResp;
 import top.continew.admin.system.service.DashboardService;
 import top.continew.starter.core.util.validate.ValidationUtils;
 import top.continew.starter.log.core.annotation.Log;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -72,6 +76,15 @@ public class DashboardController {
         return dashboardService.getOverviewIp();
     }
 
+    @Operation(summary = "查询地域分析", description = "查询地域分析")
+    @GetMapping("/analysis/geo")
+    @CachePenetrationProtect
+    @CacheRefresh(refresh = 7200)
+    @Cached(key = "'GEO'", name = CacheConstants.DASHBOARD_KEY_PREFIX, cacheType = CacheType.BOTH, syncLocal = true)
+    public List<DashboardChartCommonResp> getAnalysisGeo() throws IOException {
+        return dashboardService.getAnalysisGeo();
+    }
+
     @Operation(summary = "查询访问趋势信息", description = "查询访问趋势信息")
     @Parameter(name = "days", description = "日期数", example = "30", in = ParameterIn.PATH)
     @GetMapping("/access/trend/{days}")
@@ -90,15 +103,6 @@ public class DashboardController {
     @Cached(key = "'TIMESLOT'", name = CacheConstants.DASHBOARD_KEY_PREFIX, cacheType = CacheType.BOTH, syncLocal = true)
     public List<DashboardChartCommonResp> getAnalysisTimeslot() {
         return dashboardService.getAnalysisTimeslot();
-    }
-
-    @Operation(summary = "查询地域分析", description = "查询地域分析")
-    @GetMapping("/analysis/geo")
-    @CachePenetrationProtect
-    @CacheRefresh(refresh = 7200)
-    @Cached(key = "'GEO'", name = CacheConstants.DASHBOARD_KEY_PREFIX, cacheType = CacheType.BOTH, syncLocal = true)
-    public List<DashboardChartCommonResp> getAnalysisGeo() {
-        return dashboardService.getAnalysisGeo();
     }
 
     @Operation(summary = "查询模块分析", description = "查询模块分析")

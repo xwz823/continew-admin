@@ -83,6 +83,18 @@
         ORDER BY name
     </select>
 
+    <select id="selectListDashboardAnalysisGeo" resultType="top.continew.admin.system.model.resp.dashboard.DashboardChartCommonResp">
+        SELECT
+            CASE
+                WHEN POSITION(' ' IN address) > 0 THEN SUBSTRING(address FROM 1 FOR POSITION(' ' IN address) - 1)
+                ELSE address
+                END AS name,
+            COUNT(*) AS value
+        FROM sys_log
+        WHERE address LIKE '中国%'
+        GROUP BY name
+    </select>
+
     <select id="selectListDashboardAccessTrend"
             resultType="top.continew.admin.system.model.resp.dashboard.DashboardAccessTrendResp">
         SELECT
@@ -103,19 +115,6 @@
         FROM sys_log
         GROUP BY name
         ORDER BY name
-    </select>
-
-    <select id="selectListDashboardAnalysisGeo" resultType="top.continew.admin.system.model.resp.dashboard.DashboardChartCommonResp">
-        SELECT
-            CASE
-                WHEN POSITION(' ' IN address) > 0 THEN SUBSTRING(address FROM 1 FOR POSITION(' ' IN address) - 1)
-                ELSE address
-            END AS name,
-            COUNT(DISTINCT ip) AS value
-        FROM sys_log
-        GROUP BY name
-        ORDER BY value DESC
-        LIMIT #{top}
     </select>
 
     <select id="selectListDashboardAnalysisModule"
