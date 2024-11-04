@@ -97,11 +97,6 @@ public class InnerGenConfigDO extends GenConfigDO {
     private boolean hasBigDecimalField;
 
     /**
-     * 是否包含 List 字段
-     */
-    private boolean hasListField;
-
-    /**
      * 是否包含 Time 包字段
      */
     private boolean hasTimeField;

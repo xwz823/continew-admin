@@ -83,12 +83,13 @@
       </#list>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['${apiModuleName}:${apiName}:list']" @click="onDetail(record)">查看</a-link>
-          <a-link v-permission="['${apiModuleName}:${apiName}:update']" @click="onUpdate(record)">修改</a-link>
+          <a-link v-permission="['${apiModuleName}:${apiName}:list']" title="查看" @click="onDetail(record)">查看</a-link>
+          <a-link v-permission="['${apiModuleName}:${apiName}:update']" title="修改" @click="onUpdate(record)">修改</a-link>
           <a-link
             v-permission="['${apiModuleName}:${apiName}:delete']"
             status="danger"
             :disabled="record.disabled"
+            title="删除"
             @click="onDelete(record)"
           >
             删除

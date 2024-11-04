@@ -367,11 +367,6 @@ public class GeneratorServiceImpl implements GeneratorService {
             if (TIME_PACKAGE_CLASS.contains(fieldType)) {
                 genConfig.setHasTimeField(true);
             }
-            QueryTypeEnum queryType = fieldConfig.getQueryType();
-            if (null != queryType && StrUtil.equalsAny(queryType.name(), QueryTypeEnum.IN.name(), QueryTypeEnum.NOT_IN
-                .name(), QueryTypeEnum.BETWEEN.name())) {
-                genConfig.setHasListField(true);
-            }
             // 字典码
             if (StrUtil.isNotBlank(fieldConfig.getDictCode())) {
                 genConfig.setHasDictField(true);

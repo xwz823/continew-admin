@@ -8,9 +8,6 @@ import java.time.*;
 <#if hasBigDecimalField>
 import java.math.BigDecimal;
 </#if>
-<#if hasListField>
-import java.util.List;
-</#if>
 
 import lombok.Data;
 
@@ -41,7 +38,7 @@ public class ${className} implements Serializable {
     @Schema(description = "${fieldConfig.comment}")
     @Query(type = QueryType.${fieldConfig.queryType})
     <#if fieldConfig.queryType = 'IN' || fieldConfig.queryType = 'NOT_IN' || fieldConfig.queryType = 'BETWEEN'>
-    private List<${fieldConfig.fieldType}> ${fieldConfig.fieldName};
+    private ${fieldConfig.fieldType}[] ${fieldConfig.fieldName};
     <#else>
     private ${fieldConfig.fieldType} ${fieldConfig.fieldName};
     </#if>

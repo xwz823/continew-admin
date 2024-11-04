@@ -35,11 +35,14 @@ const { <#list dictCodes as dictCode>${dictCode}<#if dictCode_has_next>,</#if></
 
 const options: Options = {
   form: {},
-  col: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 24 },
   btns: { hide: true }
 }
 
-const columns: Columns = reactive([
+const { form, resetForm } = useForm({
+  // todo 待补充
+})
+
+const columns = computed<Columns<typeof form>>(() => [
 <#list fieldConfigs as fieldConfig>
   <#if fieldConfig.showInForm>
   {
@@ -78,10 +81,6 @@ const columns: Columns = reactive([
   </#if>
 </#list>
 ])
-
-const { form, resetForm } = useForm({
-    // todo 待补充
-})
 
 // 重置
 const reset = () => {
