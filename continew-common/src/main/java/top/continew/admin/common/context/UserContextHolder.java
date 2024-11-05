@@ -178,7 +178,7 @@ public class UserContextHolder {
      *
      * @return 是否为管理员
      */
-    public static Boolean isAdmin() {
+    public static boolean isAdmin() {
         StpUtil.checkLogin();
         return getContext().isAdmin();
     }

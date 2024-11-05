@@ -129,13 +129,6 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
     }
 
     @Override
-    public List<UserResp> list(UserQuery query, SortQuery sortQuery) {
-        QueryWrapper<UserDO> queryWrapper = this.buildQueryWrapper(query);
-        List<UserDetailResp> entityList = baseMapper.selectUserList(queryWrapper);
-        return BeanUtil.copyToList(entityList, UserResp.class);
-    }
-
-    @Override
     public void beforeAdd(UserReq req) {
         final String errorMsgTemplate = "新增失败，[{}] 已存在";
         String username = req.getUsername();

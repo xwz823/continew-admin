@@ -21,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import top.continew.admin.system.enums.NoticeScopeEnum;
 import top.continew.admin.system.model.query.NoticeQuery;
 import top.continew.admin.system.model.req.NoticeReq;
 import top.continew.admin.system.model.resp.NoticeDetailResp;
@@ -48,26 +49,31 @@ public class NoticeController extends BaseController<NoticeService, NoticeResp, 
 
     @Override
     public BaseIdResp<Long> add(@Validated(ValidateGroup.Crud.Add.class) @RequestBody NoticeReq req) {
-        this.checkTime(req);
+        this.check(req);
         return super.add(req);
     }
 
     @Override
     public void update(@Validated(ValidateGroup.Crud.Update.class) @RequestBody NoticeReq req, @PathVariable Long id) {
-        this.checkTime(req);
+        this.check(req);
         super.update(req, id);
     }
 
     /**
-     * 检查时间
+     * 校验
      *
      * @param req 创建或修改信息
      */
-    private void checkTime(NoticeReq req) {
+    private void check(NoticeReq req) {
+        // 校验生效时间
         LocalDateTime effectiveTime = req.getEffectiveTime();
         LocalDateTime terminateTime = req.getTerminateTime();
         if (null != effectiveTime && null != terminateTime) {
             ValidationUtils.throwIf(terminateTime.isBefore(effectiveTime), "终止时间必须晚于生效时间");
+        }
+        // 校验通知范围
+        if (NoticeScopeEnum.USER.equals(req.getNoticeScope())) {
+            ValidationUtils.throwIfEmpty(req.getNoticeUsers(), "请选择通知用户");
         }
     }
 }

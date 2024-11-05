@@ -20,6 +20,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import top.continew.admin.system.enums.NoticeScopeEnum;
 import top.continew.starter.extension.crud.model.resp.BaseDetailResp;
 
 import java.io.Serial;
@@ -78,8 +79,8 @@ public class NoticeDetailResp extends BaseDetailResp {
     /**
      * 通知范围
      */
-    @Schema(description = "通知范围(1.所有人 2.指定用户)", example = "1")
-    private Integer noticeScope;
+    @Schema(description = "通知范围", example = "2")
+    private NoticeScopeEnum noticeScope;
 
     /**
      * 指定用户

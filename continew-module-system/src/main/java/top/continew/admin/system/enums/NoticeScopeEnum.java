@@ -14,28 +14,32 @@
  * limitations under the License.
  */
 
-package top.continew.admin.system.mapper;
+package top.continew.admin.system.enums;
 
-import org.apache.ibatis.annotations.Param;
-import top.continew.admin.system.model.entity.NoticeDO;
-import top.continew.admin.system.model.resp.dashboard.DashboardNoticeResp;
-import top.continew.starter.data.mp.base.BaseMapper;
-
-import java.util.List;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import top.continew.starter.core.enums.BaseEnum;
 
 /**
- * 公告 Mapper
+ * 公告通知范围枚举
  *
  * @author Charles7c
  * @since 2023/8/20 10:55
  */
-public interface NoticeMapper extends BaseMapper<NoticeDO> {
+@Getter
+@RequiredArgsConstructor
+public enum NoticeScopeEnum implements BaseEnum<Integer> {
 
     /**
-     * 查询仪表盘公告列表
-     *
-     * @param userId 用户 ID
-     * @return 仪表盘公告列表
+     * 所有人
      */
-    List<DashboardNoticeResp> selectDashboardList(@Param("userId") Long userId);
+    ALL(1, "所有人"),
+
+    /**
+     * 指定用户
+     */
+    USER(2, "指定用户"),;
+
+    private final Integer value;
+    private final String description;
 }
