@@ -32,10 +32,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import top.continew.admin.common.constant.CacheConstants;
-import top.continew.admin.system.model.query.DeptQuery;
-import top.continew.admin.system.model.query.MenuQuery;
-import top.continew.admin.system.model.query.OptionQuery;
-import top.continew.admin.system.model.query.RoleQuery;
+import top.continew.admin.system.model.query.*;
 import top.continew.admin.system.model.resp.FileUploadResp;
 import top.continew.admin.system.service.*;
 import top.continew.starter.core.util.validate.ValidationUtils;
@@ -62,6 +59,7 @@ public class CommonController {
     private final FileService fileService;
     private final DeptService deptService;
     private final MenuService menuService;
+    private final UserService userService;
     private final RoleService roleService;
     private final DictItemService dictItemService;
     private final OptionService optionService;
@@ -90,6 +88,12 @@ public class CommonController {
     @GetMapping("/tree/menu")
     public List<Tree<Long>> listMenuTree(MenuQuery query, SortQuery sortQuery) {
         return menuService.tree(query, sortQuery, true);
+    }
+
+    @Operation(summary = "查询用户字典", description = "查询用户字典列表")
+    @GetMapping("/dict/user")
+    public List<LabelValueResp> listUserDict(UserQuery query, SortQuery sortQuery) {
+        return userService.listDict(query, sortQuery);
     }
 
     @Operation(summary = "查询角色字典", description = "查询角色字典列表")
