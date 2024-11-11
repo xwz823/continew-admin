@@ -145,8 +145,8 @@ public class LoginServiceImpl implements LoginService {
             user.setAvatar(authUser.getAvatar());
             user.setDeptId(SysConstants.SUPER_DEPT_ID);
             Long userId = userService.add(user);
-            RoleDO role = roleService.getByCode(SysConstants.ADMIN_ROLE_CODE);
-            userRoleService.add(Collections.singletonList(role.getId()), userId);
+            RoleDO role = roleService.getByCode(SysConstants.SUPER_ROLE_CODE);
+            userRoleService.assignRolesToUser(Collections.singletonList(role.getId()), userId);
             userSocial = new UserSocialDO();
             userSocial.setUserId(userId);
             userSocial.setSource(source);
@@ -170,7 +170,7 @@ public class LoginServiceImpl implements LoginService {
         }
         // 查询菜单列表
         Set<MenuResp> menuSet = new LinkedHashSet<>();
-        if (roleCodeSet.contains(SysConstants.ADMIN_ROLE_CODE)) {
+        if (roleCodeSet.contains(SysConstants.SUPER_ROLE_CODE)) {
             menuSet.addAll(menuService.listAll());
         } else {
             roleCodeSet.forEach(roleCode -> menuSet.addAll(menuService.listByRoleCode(roleCode)));

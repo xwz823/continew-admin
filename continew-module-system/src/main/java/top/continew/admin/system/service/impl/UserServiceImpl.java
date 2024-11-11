@@ -144,7 +144,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
         Long userId = user.getId();
         baseMapper.lambdaUpdate().set(UserDO::getPwdResetTime, LocalDateTime.now()).eq(UserDO::getId, userId).update();
         // 保存用户和角色关联
-        userRoleService.add(req.getRoleIds(), userId);
+        userRoleService.assignRolesToUser(req.getRoleIds(), userId);
     }
 
     @Override
@@ -174,7 +174,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
         newUser.setId(id);
         baseMapper.updateById(newUser);
         // 保存用户和角色关联
-        boolean isSaveUserRoleSuccess = userRoleService.add(req.getRoleIds(), id);
+        boolean isSaveUserRoleSuccess = userRoleService.assignRolesToUser(req.getRoleIds(), id);
         // 如果禁用用户，则踢出在线用户
         if (DisEnableStatusEnum.DISABLE.equals(newStatus)) {
             onlineUserService.kickOut(id);
@@ -389,7 +389,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
     public void updateRole(UserRoleUpdateReq updateReq, Long id) {
         super.getById(id);
         // 保存用户和角色关联
-        userRoleService.add(updateReq.getRoleIds(), id);
+        userRoleService.assignRolesToUser(updateReq.getRoleIds(), id);
     }
 
     @Override

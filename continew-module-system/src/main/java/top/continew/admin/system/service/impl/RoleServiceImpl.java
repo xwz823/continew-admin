@@ -94,7 +94,7 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, RoleDO, RoleRes
         }
         // 更新信息
         super.update(req, id);
-        if (SysConstants.ADMIN_ROLE_CODE.equals(req.getCode())) {
+        if (SysConstants.SUPER_ROLE_CODE.equals(req.getCode())) {
             return;
         }
         // 保存角色和菜单关联
@@ -136,7 +136,7 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, RoleDO, RoleRes
         super.fill(obj);
         if (obj instanceof RoleDetailResp detail) {
             Long roleId = detail.getId();
-            if (SysConstants.ADMIN_ROLE_CODE.equals(detail.getCode())) {
+            if (SysConstants.SUPER_ROLE_CODE.equals(detail.getCode())) {
                 List<MenuResp> list = menuService.listAll();
                 List<Long> menuIds = list.stream().map(MenuResp::getId).toList();
                 detail.setMenuIds(menuIds);
@@ -150,7 +150,7 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, RoleDO, RoleRes
     public Set<String> listPermissionByUserId(Long userId) {
         Set<String> roleCodeSet = this.listCodeByUserId(userId);
         // 超级管理员赋予全部权限
-        if (roleCodeSet.contains(SysConstants.ADMIN_ROLE_CODE)) {
+        if (roleCodeSet.contains(SysConstants.SUPER_ROLE_CODE)) {
             return CollUtil.newHashSet(SysConstants.ALL_PERMISSION);
         }
         return menuService.listPermissionByUserId(userId);
