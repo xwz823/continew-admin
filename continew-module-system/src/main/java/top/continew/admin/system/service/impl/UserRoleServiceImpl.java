@@ -57,6 +57,8 @@ public class UserRoleServiceImpl implements UserRoleService {
         if (CollUtil.isEmpty(CollUtil.disjunction(roleIds, oldRoleIdList))) {
             return false;
         }
+        CheckUtils.throwIf(SysConstants.SUPER_USER_ID.equals(userId) && !roleIds
+            .contains(SysConstants.SUPER_ROLE_ID), "不允许变更超管用户角色");
         // 删除原有关联
         baseMapper.lambdaUpdate().eq(UserRoleDO::getUserId, userId).remove();
         // 保存最新关联

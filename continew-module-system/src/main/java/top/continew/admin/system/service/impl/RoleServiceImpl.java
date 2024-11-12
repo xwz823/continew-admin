@@ -26,7 +26,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import top.continew.admin.auth.service.OnlineUserService;
 import top.continew.admin.common.constant.CacheConstants;
 import top.continew.admin.common.constant.ContainerConstants;
 import top.continew.admin.common.constant.SysConstants;
@@ -62,7 +61,6 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, RoleDO, RoleRes
     private final RoleMenuService roleMenuService;
     private final RoleDeptService roleDeptService;
     private final UserRoleService userRoleService;
-    private final OnlineUserService onlineUserService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -103,15 +101,7 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, RoleDO, RoleRes
         boolean isSaveDeptSuccess = roleDeptService.add(req.getDeptIds(), id);
         // 如果功能权限或数据权限有变更，则更新在线用户权限信息
         if (isSaveMenuSuccess || isSaveDeptSuccess || ObjectUtil.notEqual(req.getDataScope(), oldDataScope)) {
-            List<Long> userIdList = userRoleService.listUserIdByRoleId(id);
-            userIdList.parallelStream().forEach(userId -> {
-                UserContext userContext = UserContextHolder.getContext(userId);
-                if (null != userContext) {
-                    userContext.setRoles(this.listByUserId(userId));
-                    userContext.setPermissions(this.listPermissionByUserId(userId));
-                    UserContextHolder.setContext(userContext);
-                }
-            });
+            this.updateUserContext(id);
         }
     }
 
@@ -198,6 +188,15 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, RoleDO, RoleRes
         return (int)this.count(Wrappers.<RoleDO>lambdaQuery().in(RoleDO::getName, roleNames));
     }
 
+    @Override
+    public void assignToUsers(Long id, List<Long> userIds) {
+        super.getById(id);
+        // 保存用户和角色关联
+        userRoleService.assignRoleToUsers(id, userIds);
+        // 更新用户上下文
+        this.updateUserContext(id);
+    }
+
     /**
      * 名称是否存在
      *
@@ -218,5 +217,22 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, RoleDO, RoleRes
      */
     private boolean isCodeExists(String code, Long id) {
         return baseMapper.lambdaQuery().eq(RoleDO::getCode, code).ne(null != id, RoleDO::getId, id).exists();
+    }
+
+    /**
+     * 更新用户上下文
+     *
+     * @param roleId 角色 ID
+     */
+    private void updateUserContext(Long roleId) {
+        List<Long> userIdList = userRoleService.listUserIdByRoleId(roleId);
+        userIdList.parallelStream().forEach(userId -> {
+            UserContext userContext = UserContextHolder.getContext(userId);
+            if (null != userContext) {
+                userContext.setRoles(this.listByUserId(userId));
+                userContext.setPermissions(this.listPermissionByUserId(userId));
+                UserContextHolder.setContext(userContext);
+            }
+        });
     }
 }

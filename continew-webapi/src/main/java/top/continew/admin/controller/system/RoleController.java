@@ -66,6 +66,6 @@ public class RoleController extends BaseController<RoleService, RoleResp, RoleDe
     @PostMapping("/{id}/user")
     public void assignToUsers(@PathVariable("id") Long id,
                               @Validated @NotEmpty(message = "用户ID列表不能为空") @RequestBody List<Long> userIds) {
-        userRoleService.assignRoleToUsers(id, userIds);
+        baseService.assignToUsers(id, userIds);
     }
 }

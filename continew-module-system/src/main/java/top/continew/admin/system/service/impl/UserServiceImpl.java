@@ -182,12 +182,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
         }
         // 如果角色有变更，则更新在线用户权限信息
         if (isSaveUserRoleSuccess) {
-            UserContext userContext = UserContextHolder.getContext(id);
-            if (null != userContext) {
-                userContext.setRoles(roleService.listByUserId(id));
-                userContext.setPermissions(roleService.listPermissionByUserId(id));
-                UserContextHolder.setContext(userContext);
-            }
+            this.updateContext(id);
         }
     }
 
@@ -209,6 +204,8 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
         userPasswordHistoryService.deleteByUserIds(ids);
         // 删除用户
         super.delete(ids);
+        // 踢出在线用户
+        ids.forEach(onlineUserService::kickOut);
     }
 
     @Override
@@ -388,8 +385,11 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
     @Override
     public void updateRole(UserRoleUpdateReq updateReq, Long id) {
         super.getById(id);
+        List<Long> roleIds = updateReq.getRoleIds();
         // 保存用户和角色关联
-        userRoleService.assignRolesToUser(updateReq.getRoleIds(), id);
+        userRoleService.assignRolesToUser(roleIds, id);
+        // 更新用户上下文
+        this.updateContext(id);
     }
 
     @Override
@@ -684,5 +684,19 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
         return this.list(Wrappers.<UserDO>lambdaQuery()
             .in(UserDO::getUsername, usernames)
             .select(UserDO::getId, UserDO::getUsername));
+    }
+
+    /**
+     * 更新用户上下文信息
+     *
+     * @param id ID
+     */
+    private void updateContext(Long id) {
+        UserContext userContext = UserContextHolder.getContext(id);
+        if (null != userContext) {
+            userContext.setRoles(roleService.listByUserId(id));
+            userContext.setPermissions(roleService.listPermissionByUserId(id));
+            UserContextHolder.setContext(userContext);
+        }
     }
 }
