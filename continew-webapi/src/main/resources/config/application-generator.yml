@@ -63,11 +63,6 @@ generator:
         - timestamp
   ## 模板配置
   templateConfigs:
-    MenuSql:
-        template-path: backend/menu.sql.ftl
-        package-name: sql
-        extension: .sql
-        backend: true
     DO:
       # 模板路径
       templatePath: backend/Entity.ftl
@@ -134,3 +129,8 @@ generator:
       packageName: src/views
       extension: .vue
       backend: false
+    Menu:
+      template-path: backend/Menu.ftl
+      packageName: sql
+      extension: .sql
+      backend: true

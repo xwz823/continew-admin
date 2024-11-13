@@ -23,14 +23,14 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 表信息查询条件
+ * 生成配置查询条件
  *
  * @author Charles7c
  * @since 2023/4/12 20:21
  */
 @Data
-@Schema(description = "表信息查询条件")
-public class TableQuery implements Serializable {
+@Schema(description = "生成配置查询条件")
+public class GenConfigQuery implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
