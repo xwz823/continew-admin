@@ -4,8 +4,7 @@
     :title="title"
     :mask-closable="false"
     :esc-to-close="false"
-    :modal-style="{ maxWidth: '520px' }"
-    width="90%"
+    :width="width >= 600 ? 600 : '100%'"
     @before-ok="save"
     @close="reset"
   >
@@ -25,6 +24,7 @@ const emit = defineEmits<{
 }>()
 
 const dataId = ref('')
+const visible = ref(false)
 const isUpdate = computed(() => !!dataId.value)
 const title = computed(() => (isUpdate.value ? '修改${businessName}' : '新增${businessName}'))
 const formRef = ref<InstanceType<typeof GiForm>>()
@@ -34,15 +34,11 @@ const { <#list dictCodes as dictCode>${dictCode}<#if dictCode_has_next>,</#if></
 </#if>
 
 const options: Options = {
-  form: {},
-  btns: { hide: true }
+  form: { size: 'large' },
+  btns: { hide: true },
 }
 
-const { form, resetForm } = useForm({
-  // todo 待补充
-})
-
-const columns = computed<Columns<typeof form>>(() => [
+const columns: Columns = reactive([
 <#list fieldConfigs as fieldConfig>
   <#if fieldConfig.showInForm>
   {
@@ -69,7 +65,7 @@ const columns = computed<Columns<typeof form>>(() => [
     <#elseif fieldConfig.formType = 'SELECT'>
     type: 'select', 
     <#elseif fieldConfig.formType = 'RADIO'>
-    type: 'radio-group'
+    type: 'radio-group',
     </#if>
     <#if fieldConfig.dictCode?? && fieldConfig.dictCode != ''>
     options: ${fieldConfig.dictCode},
@@ -82,27 +78,14 @@ const columns = computed<Columns<typeof form>>(() => [
 </#list>
 ])
 
+const { form, resetForm } = useForm({
+  // todo 待补充
+})
+
 // 重置
 const reset = () => {
   formRef.value?.formRef?.resetFields()
   resetForm()
-}
-
-const visible = ref(false)
-// 新增
-const onAdd = () => {
-  reset()
-  dataId.value = ''
-  visible.value = true
-}
-
-// 修改
-const onUpdate = async (id: string) => {
-  reset()
-  dataId.value = id
-  const res = await get${classNamePrefix}(id)
-  Object.assign(form, res.data)
-  visible.value = true
 }
 
 // 保存
@@ -122,6 +105,22 @@ const save = async () => {
   } catch (error) {
     return false
   }
+}
+
+// 新增
+const onAdd = async () => {
+  reset()
+  dataId.value = ''
+  visible.value = true
+}
+
+// 修改
+const onUpdate = async (id: string) => {
+  reset()
+  dataId.value = id
+  const { data } = await get${classNamePrefix}(id)
+  Object.assign(form, data)
+  visible.value = true
 }
 
 defineExpose({ onAdd, onUpdate })

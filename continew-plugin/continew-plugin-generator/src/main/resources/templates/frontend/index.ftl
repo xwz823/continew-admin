@@ -83,13 +83,13 @@
       </#list>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['${apiModuleName}:${apiName}:list']" title="查看" @click="onDetail(record)">查看</a-link>
+          <a-link v-permission="['${apiModuleName}:${apiName}:detail']" title="详情" @click="onDetail(record)">详情</a-link>
           <a-link v-permission="['${apiModuleName}:${apiName}:update']" title="修改" @click="onUpdate(record)">修改</a-link>
           <a-link
             v-permission="['${apiModuleName}:${apiName}:delete']"
             status="danger"
             :disabled="record.disabled"
-            title="删除"
+            :title="record.disabled ? '不可删除' : '删除'"
             @click="onDelete(record)"
           >
             删除
@@ -106,12 +106,12 @@
 <script setup lang="ts">
 import ${classNamePrefix}AddModal from './${classNamePrefix}AddModal.vue'
 import ${classNamePrefix}DetailDrawer from './${classNamePrefix}DetailDrawer.vue'
-import { type ${classNamePrefix}Resp, type ${classNamePrefix}Query, delete${classNamePrefix}, export${classNamePrefix}, list${classNamePrefix} } from '@/apis/${apiModuleName}'
+import { type ${classNamePrefix}Resp, type ${classNamePrefix}Query, delete${classNamePrefix}, export${classNamePrefix}, list${classNamePrefix} } from '@/apis/${apiModuleName}/${apiName}'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { useDownload, useTable } from '@/hooks'
+import { useDict } from '@/hooks/app'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
-import { useDict } from '@/hooks/app'
 
 defineOptions({ name: '${classNamePrefix}' })
 
@@ -125,7 +125,7 @@ const queryForm = reactive<${classNamePrefix}Query>({
   ${fieldConfig.fieldName}: undefined,
 </#if>
 </#list>
-  sort: ['createTime,desc']
+  sort: ['id,desc']
 })
 
 const {
@@ -191,7 +191,7 @@ const onUpdate = (record: ${classNamePrefix}Resp) => {
 const ${classNamePrefix}DetailDrawerRef = ref<InstanceType<typeof ${classNamePrefix}DetailDrawer>>()
 // 详情
 const onDetail = (record: ${classNamePrefix}Resp) => {
-  ${classNamePrefix}DetailDrawerRef.value?.onDetail(record.id)
+  ${classNamePrefix}DetailDrawerRef.value?.onOpen(record.id)
 }
 </script>
 
