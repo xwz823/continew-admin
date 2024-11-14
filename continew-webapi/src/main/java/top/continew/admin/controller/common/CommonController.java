@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.dromara.x.file.storage.core.FileInfo;
@@ -32,6 +31,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import top.continew.admin.common.constant.CacheConstants;
+import top.continew.admin.system.enums.OptionCategoryEnum;
 import top.continew.admin.system.model.query.*;
 import top.continew.admin.system.model.resp.FileUploadResp;
 import top.continew.admin.system.service.*;
@@ -104,12 +104,12 @@ public class CommonController {
     }
 
     @SaIgnore
-    @Operation(summary = "查询参数字典", description = "查询参数字典")
-    @GetMapping("/dict/option")
-    @Cached(key = "#category", name = CacheConstants.OPTION_KEY_PREFIX)
-    public List<LabelValueResp<String>> listOptionDict(@NotBlank(message = "类别不能为空") String category) {
+    @Operation(summary = "查询系统配置参数", description = "查询系统配置参数")
+    @GetMapping("/dict/option/site")
+    @Cached(key = "'SITE'", name = CacheConstants.OPTION_KEY_PREFIX)
+    public List<LabelValueResp<String>> listSiteOptionDict() {
         OptionQuery optionQuery = new OptionQuery();
-        optionQuery.setCategory(category);
+        optionQuery.setCategory(OptionCategoryEnum.SITE);
         return optionService.list(optionQuery)
             .stream()
             .map(option -> new LabelValueResp<>(option.getCode(), StrUtil.nullToDefault(option.getValue(), option
