@@ -14,6 +14,7 @@
 
 <script setup lang="ts">
 import { Message } from '@arco-design/web-vue'
+import { useWindowSize } from '@vueuse/core'
 import { get${classNamePrefix}, add${classNamePrefix}, update${classNamePrefix} } from '@/apis/${apiModuleName}/${apiName}'
 import { type Columns, GiForm, type Options } from '@/components/GiForm'
 import { useForm } from '@/hooks'
@@ -22,6 +23,8 @@ import { useDict } from '@/hooks/app'
 const emit = defineEmits<{
   (e: 'save-success'): void
 }>()
+
+const { width } = useWindowSize()
 
 const dataId = ref('')
 const visible = ref(false)

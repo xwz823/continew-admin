@@ -44,7 +44,7 @@ import java.time.LocalDateTime;
  */
 @Tag(name = "公告管理 API")
 @RestController
-@CrudRequestMapping(value = "/system/notice", api = {Api.PAGE, Api.GET, Api.ADD, Api.UPDATE, Api.DELETE})
+@CrudRequestMapping(value = "/system/notice", api = {Api.PAGE, Api.DETAIL, Api.ADD, Api.UPDATE, Api.DELETE})
 public class NoticeController extends BaseController<NoticeService, NoticeResp, NoticeDetailResp, NoticeQuery, NoticeReq> {
 
     @Override

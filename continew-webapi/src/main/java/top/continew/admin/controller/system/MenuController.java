@@ -44,7 +44,7 @@ import top.continew.starter.extension.crud.util.ValidateGroup;
  */
 @Tag(name = "菜单管理 API")
 @RestController
-@CrudRequestMapping(value = "/system/menu", api = {Api.TREE, Api.GET, Api.ADD, Api.UPDATE, Api.DELETE})
+@CrudRequestMapping(value = "/system/menu", api = {Api.TREE, Api.DETAIL, Api.ADD, Api.UPDATE, Api.DELETE})
 public class MenuController extends BaseController<MenuService, MenuResp, MenuResp, MenuQuery, MenuReq> {
 
     @Override

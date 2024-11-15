@@ -46,7 +46,7 @@ import top.continew.starter.extension.crud.model.resp.BaseIdResp;
 @Tag(name = "应用管理 API")
 @RestController
 @RequiredArgsConstructor
-@CrudRequestMapping(value = "/open/app", api = {Api.PAGE, Api.GET, Api.ADD, Api.UPDATE, Api.DELETE, Api.EXPORT})
+@CrudRequestMapping(value = "/open/app", api = {Api.PAGE, Api.DETAIL, Api.ADD, Api.UPDATE, Api.DELETE, Api.EXPORT})
 public class AppController extends BaseController<AppService, AppResp, AppDetailResp, AppQuery, AppReq> {
 
     private final AppService appService;

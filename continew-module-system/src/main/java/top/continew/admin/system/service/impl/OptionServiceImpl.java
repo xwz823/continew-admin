@@ -26,6 +26,7 @@ import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWra
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import top.continew.admin.common.constant.CacheConstants;
+import top.continew.admin.system.enums.OptionCategoryEnum;
 import top.continew.admin.system.enums.PasswordPolicyEnum;
 import top.continew.admin.system.mapper.OptionMapper;
 import top.continew.admin.system.model.entity.OptionDO;
@@ -64,8 +65,8 @@ public class OptionServiceImpl implements OptionService {
 
     @Override
     @Cached(key = "#category", name = CacheConstants.OPTION_KEY_PREFIX + "MAP:")
-    public Map<String, String> getByCategory(String category) {
-        return baseMapper.selectByCategory(category)
+    public Map<String, String> getByCategory(OptionCategoryEnum category) {
+        return baseMapper.selectByCategory(category.name())
             .stream()
             .collect(Collectors.toMap(OptionDO::getCode, o -> StrUtil.emptyIfNull(ObjectUtil.defaultIfNull(o
                 .getValue(), o.getDefaultValue())), (oldVal, newVal) -> oldVal));
@@ -87,8 +88,8 @@ public class OptionServiceImpl implements OptionService {
         }
         // 校验密码策略参数取值范围
         Map<String, String> passwordPolicyOptionMap = options.stream()
-            .filter(option -> StrUtil.startWith(option
-                .getCode(), PasswordPolicyEnum.CATEGORY + StringConstants.UNDERLINE))
+            .filter(option -> StrUtil.startWith(option.getCode(), PasswordPolicyEnum.CATEGORY
+                .name() + StringConstants.UNDERLINE))
             .collect(Collectors.toMap(OptionReq::getCode, OptionReq::getValue, (oldVal, newVal) -> oldVal));
         for (Map.Entry<String, String> passwordPolicyOptionEntry : passwordPolicyOptionMap.entrySet()) {
             String code = passwordPolicyOptionEntry.getKey();

@@ -61,7 +61,7 @@ import java.io.IOException;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@CrudRequestMapping(value = "/system/user", api = {Api.PAGE, Api.LIST, Api.GET, Api.ADD, Api.UPDATE, Api.DELETE,
+@CrudRequestMapping(value = "/system/user", api = {Api.PAGE, Api.LIST, Api.DETAIL, Api.ADD, Api.UPDATE, Api.DELETE,
     Api.EXPORT})
 public class UserController extends BaseController<UserService, UserResp, UserDetailResp, UserQuery, UserReq> {
 

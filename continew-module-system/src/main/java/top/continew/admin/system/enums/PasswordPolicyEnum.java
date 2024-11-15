@@ -168,7 +168,7 @@ public enum PasswordPolicyEnum {
     /**
      * 策略类别
      */
-    public static final String CATEGORY = "PASSWORD";
+    public static final OptionCategoryEnum CATEGORY = OptionCategoryEnum.PASSWORD;
 
     /**
      * 校验取值范围

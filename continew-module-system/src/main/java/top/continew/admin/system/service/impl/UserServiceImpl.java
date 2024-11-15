@@ -61,6 +61,7 @@ import top.continew.admin.common.context.UserContextHolder;
 import top.continew.admin.common.enums.DisEnableStatusEnum;
 import top.continew.admin.common.enums.GenderEnum;
 import top.continew.admin.common.util.SecureUtils;
+import top.continew.admin.system.enums.OptionCategoryEnum;
 import top.continew.admin.system.mapper.UserMapper;
 import top.continew.admin.system.model.entity.DeptDO;
 import top.continew.admin.system.model.entity.RoleDO;
@@ -630,7 +631,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
      * @return 密码允许重复使用次数
      */
     private int checkPassword(String password, UserDO user) {
-        Map<String, String> passwordPolicy = optionService.getByCategory(CATEGORY);
+        Map<String, String> passwordPolicy = optionService.getByCategory(OptionCategoryEnum.PASSWORD);
         // 密码最小长度
         PASSWORD_MIN_LENGTH.validate(password, MapUtil.getInt(passwordPolicy, PASSWORD_MIN_LENGTH.name()), user);
         // 密码是否必须包含特殊字符
