@@ -55,14 +55,14 @@ public class DictItemServiceImpl extends BaseServiceImpl<DictItemMapper, DictIte
     private static final Map<String, List<LabelValueResp>> ENUM_DICT_CACHE = new ConcurrentHashMap<>();
 
     @Override
-    protected void beforeAdd(DictItemReq req) {
+    public void beforeAdd(DictItemReq req) {
         String value = req.getValue();
         CheckUtils.throwIf(this.isValueExists(value, null, req.getDictId()), "新增失败，字典值 [{}] 已存在", value);
         RedisUtils.deleteByPattern(CacheConstants.DICT_KEY_PREFIX + StringConstants.ASTERISK);
     }
 
     @Override
-    protected void beforeUpdate(DictItemReq req, Long id) {
+    public void beforeUpdate(DictItemReq req, Long id) {
         String value = req.getValue();
         CheckUtils.throwIf(this.isValueExists(value, id, req.getDictId()), "修改失败，字典值 [{}] 已存在", value);
         RedisUtils.deleteByPattern(CacheConstants.DICT_KEY_PREFIX + StringConstants.ASTERISK);

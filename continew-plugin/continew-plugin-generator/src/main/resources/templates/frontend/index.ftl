@@ -1,8 +1,8 @@
 <template>
   <div class="table-page">
     <GiTable
-      row-key="id"
       title="${businessName}管理"
+      row-key="id"
       :data="dataList"
       :columns="columns"
       :loading="loading"
@@ -135,7 +135,6 @@ const {
   search,
   handleDelete
 } = useTable((page) => list${classNamePrefix}({ ...queryForm, ...page }), { immediate: true })
-
 const columns: TableInstanceColumns[] = [
 <#if fieldConfigs??>
   <#list fieldConfigs as fieldConfig>
@@ -150,7 +149,7 @@ const columns: TableInstanceColumns[] = [
     width: 130,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['${apiModuleName}:${apiName}:update', '${apiModuleName}:${apiName}:delete'])
+    show: has.hasPermOr(['${apiModuleName}:${apiName}:detail', '${apiModuleName}:${apiName}:update', '${apiModuleName}:${apiName}:delete'])
   }
 ]
 

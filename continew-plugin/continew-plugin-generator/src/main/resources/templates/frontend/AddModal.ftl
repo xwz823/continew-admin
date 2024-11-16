@@ -4,6 +4,7 @@
     :title="title"
     :mask-closable="false"
     :esc-to-close="false"
+    draggable
     :width="width >= 600 ? 600 : '100%'"
     @before-ok="save"
     @close="reset"
@@ -31,7 +32,6 @@ const visible = ref(false)
 const isUpdate = computed(() => !!dataId.value)
 const title = computed(() => (isUpdate.value ? '修改${businessName}' : '新增${businessName}'))
 const formRef = ref<InstanceType<typeof GiForm>>()
-
 <#if hasDictField>
 const { <#list dictCodes as dictCode>${dictCode}<#if dictCode_has_next>,</#if></#list> } = useDict(<#list dictCodes as dictCode>'${dictCode}'<#if dictCode_has_next>,</#if></#list>)
 </#if>

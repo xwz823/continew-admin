@@ -210,13 +210,6 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
     }
 
     @Override
-    public Long add(UserDO user) {
-        user.setStatus(DisEnableStatusEnum.ENABLE);
-        baseMapper.insert(user);
-        return user.getId();
-    }
-
-    @Override
     public void downloadImportTemplate(HttpServletResponse response) throws IOException {
         try {
             FileUploadUtils.download(response, ResourceUtil.getStream("templates/import/user.xlsx"), "用户导入模板.xlsx");
@@ -360,19 +353,6 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
         return new UserImportResp(insertList.size() + updateList.size(), insertList.size(), updateList.size());
     }
 
-    public void doImportUser(List<UserDO> insertList, List<UserDO> updateList, List<UserRoleDO> userRoleDOList) {
-        if (CollUtil.isNotEmpty(insertList)) {
-            baseMapper.insert(insertList);
-        }
-        if (CollUtil.isNotEmpty(updateList)) {
-            this.updateBatchById(updateList);
-            userRoleService.deleteByUserIds(updateList.stream().map(UserDO::getId).toList());
-        }
-        if (CollUtil.isNotEmpty(userRoleDOList)) {
-            userRoleService.saveBatch(userRoleDOList);
-        }
-    }
-
     @Override
     public void resetPassword(UserPasswordResetReq req, Long id) {
         super.getById(id);
@@ -460,6 +440,13 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
     }
 
     @Override
+    public Long add(UserDO user) {
+        user.setStatus(DisEnableStatusEnum.ENABLE);
+        baseMapper.insert(user);
+        return user.getId();
+    }
+
+    @Override
     public UserDO getByUsername(String username) {
         return baseMapper.selectByUsername(username);
     }
@@ -521,6 +508,26 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
                 q.in("t1.dept_id", deptIdList);
             })
             .in(CollUtil.isNotEmpty(userIdList), "t1.id", userIdList);
+    }
+
+    /**
+     * 导入用户
+     *
+     * @param insertList     新增用户
+     * @param updateList     修改用户
+     * @param userRoleDOList 用户角色关联
+     */
+    private void doImportUser(List<UserDO> insertList, List<UserDO> updateList, List<UserRoleDO> userRoleDOList) {
+        if (CollUtil.isNotEmpty(insertList)) {
+            baseMapper.insert(insertList);
+        }
+        if (CollUtil.isNotEmpty(updateList)) {
+            this.updateBatchById(updateList);
+            userRoleService.deleteByUserIds(updateList.stream().map(UserDO::getId).toList());
+        }
+        if (CollUtil.isNotEmpty(userRoleDOList)) {
+            userRoleService.saveBatch(userRoleDOList);
+        }
     }
 
     /**
@@ -681,6 +688,12 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, UserDO, UserRes
         return null != count && count > 0;
     }
 
+    /**
+     * 根据用户名获取用户列表
+     *
+     * @param usernames 用户名列表
+     * @return 用户列表
+     */
     private List<UserDO> listByUsernames(List<String> usernames) {
         return this.list(Wrappers.<UserDO>lambdaQuery()
             .in(UserDO::getUsername, usernames)
