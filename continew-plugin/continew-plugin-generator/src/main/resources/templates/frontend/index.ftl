@@ -145,8 +145,9 @@ const columns: TableInstanceColumns[] = [
 </#if>
   {
     title: '操作',
+    dataIndex: 'action',
     slotName: 'action',
-    width: 130,
+    width: 160,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
     show: has.hasPermOr(['${apiModuleName}:${apiName}:detail', '${apiModuleName}:${apiName}:update', '${apiModuleName}:${apiName}:delete'])

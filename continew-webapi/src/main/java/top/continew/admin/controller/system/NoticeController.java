@@ -62,7 +62,7 @@ public class NoticeController extends BaseController<NoticeService, NoticeResp, 
     /**
      * 校验
      *
-     * @param req 创建或修改信息
+     * @param req 创建或修改参数
      */
     private void check(NoticeReq req) {
         // 校验生效时间

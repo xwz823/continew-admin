@@ -62,7 +62,7 @@ public class MenuController extends BaseController<MenuService, MenuResp, MenuRe
     /**
      * 检查路由地址格式
      *
-     * @param req 创建或修改信息
+     * @param req 创建或修改参数
      */
     private void checkPath(MenuReq req) {
         Boolean isExternal = ObjectUtil.defaultIfNull(req.getIsExternal(), false);
