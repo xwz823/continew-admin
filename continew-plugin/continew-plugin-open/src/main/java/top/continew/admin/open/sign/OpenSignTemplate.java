@@ -28,12 +28,18 @@ import java.util.TreeMap;
 
 import static cn.dev33.satoken.SaManager.log;
 
+/**
+ * API 参数签名算法
+ *
+ * @author chengzi
+ * @since 2024/10/17 16:03
+ */
 @Component
 @RequiredArgsConstructor
 public class OpenSignTemplate extends SaSignTemplate {
 
     private final AppService appService;
-    public static String appKey = "appkey";
+    public static final String ACCESS_KEY = "accessKey";
 
     @Override
     public void checkParamMap(Map<String, String> paramMap) {
@@ -41,19 +47,19 @@ public class OpenSignTemplate extends SaSignTemplate {
         String timestampValue = paramMap.get(timestamp);
         String nonceValue = paramMap.get(nonce);
         String signValue = paramMap.get(sign);
-        String appKeyValue = paramMap.get(appKey);
+        String accessKeyValue = paramMap.get(ACCESS_KEY);
 
         // 参数非空校验
         SaSignException.notEmpty(timestampValue, "缺少 timestamp 字段");
         SaSignException.notEmpty(nonceValue, "缺少 nonce 字段");
         SaSignException.notEmpty(signValue, "缺少 sign 字段");
-        SaSignException.notEmpty(appKeyValue, "缺少 appkey 字段");
+        SaSignException.notEmpty(accessKeyValue, "缺少 accessKey 字段");
 
         // 应用存在性校验
-        SaSignException.notTrue(!appService.isExistAppKey(appKeyValue), "应用不存在");
+        SaSignException.notTrue(!appService.isAppExists(ACCESS_KEY), "应用不存在");
 
         // 应用是否过期校验
-        SaSignException.notTrue(appService.isExpireAppKey(appKeyValue), "应用已过期");
+        SaSignException.notTrue(appService.isAppSecretExpired(ACCESS_KEY), "应用已过期");
 
         // 依次校验三个参数
         checkTimestamp(Long.parseLong(timestampValue));
@@ -67,7 +73,7 @@ public class OpenSignTemplate extends SaSignTemplate {
     public String createSign(Map<String, ?> paramsMap) {
         // 根据应用密钥获取对应的应用密码
         String appKey = (String)((Map)paramsMap).get("appkey");
-        String secretKey = this.appService.getAppSecretByAppKey(appKey);
+        String secretKey = this.appService.getSecretKeyByAccessKey(appKey);
         SaSignException.notEmpty(secretKey, "参与参数签名的秘钥不可为空", SaErrorCode.CODE_12201);
 
         // 如果调用者不小心传入了 sign 参数，则此处需要将 sign 参数排除在外

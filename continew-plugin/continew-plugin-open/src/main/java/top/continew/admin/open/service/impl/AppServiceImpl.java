@@ -16,22 +16,22 @@
 
 package top.continew.admin.open.service.impl;
 
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.IdUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
-
-import top.continew.admin.open.model.resp.AppSecretGetResp;
-import top.continew.starter.extension.crud.service.impl.BaseServiceImpl;
 import top.continew.admin.open.mapper.AppMapper;
 import top.continew.admin.open.model.entity.AppDO;
 import top.continew.admin.open.model.query.AppQuery;
 import top.continew.admin.open.model.req.AppReq;
 import top.continew.admin.open.model.resp.AppDetailResp;
 import top.continew.admin.open.model.resp.AppResp;
+import top.continew.admin.open.model.resp.AppSecretResp;
 import top.continew.admin.open.service.AppService;
+import top.continew.starter.core.constant.StringConstants;
+import top.continew.starter.extension.crud.service.impl.BaseServiceImpl;
 
 import java.time.LocalDateTime;
 
@@ -39,64 +39,76 @@ import java.time.LocalDateTime;
  * 应用业务实现
  *
  * @author chengzi
+ * @author Charles7c
  * @since 2024/10/17 16:03
  */
 @Service
 @RequiredArgsConstructor
 public class AppServiceImpl extends BaseServiceImpl<AppMapper, AppDO, AppResp, AppDetailResp, AppQuery, AppReq> implements AppService {
 
-    // 已激活
-    private final static String APP_ENABLED_KEY = "1";
-    // 未激活
-    private final static String APP_DISABLED_KEY = "0";
+    @Override
+    public void beforeAdd(AppReq req) {
+        req.setAccessKey(Base64.encode(IdUtil.fastSimpleUUID())
+            .replace(StringConstants.SLASH, StringConstants.EMPTY)
+            .replace("+", StringConstants.EMPTY)
+            .substring(0, 30));
+        req.setSecretKey(this.generateSecret());
+    }
 
     @Override
-    public AppSecretGetResp getAppSecretById(Long id) {
-        AppDO app = baseMapper.lambdaQuery().eq(AppDO::getId, id).one();
-        String appSecret = "********";
-        if (app.getSecretStatus().equals(APP_DISABLED_KEY)) {
-            appSecret = app.getAppSecret();
-            this.resetAppSecretStatusById(id, APP_ENABLED_KEY);
+    public AppSecretResp getSecret(Long id) {
+        AppDO app = super.getById(id);
+        AppSecretResp appSecretResp = new AppSecretResp();
+        appSecretResp.setAccessKey(app.getAccessKey());
+        appSecretResp.setSecretKey(app.getSecretKey());
+        return appSecretResp;
+    }
+
+    @Override
+    public void resetSecret(Long id) {
+        super.getById(id);
+        AppDO app = new AppDO();
+        app.setSecretKey(this.generateSecret());
+        baseMapper.update(app, Wrappers.lambdaQuery(AppDO.class).eq(AppDO::getId, id));
+    }
+
+    @Override
+    public String getSecretKeyByAccessKey(String accessKey) {
+        return baseMapper.lambdaQuery()
+            .select(AppDO::getSecretKey)
+            .eq(AppDO::getAccessKey, accessKey)
+            .oneOpt()
+            .map(AppDO::getSecretKey)
+            .orElse(null);
+    }
+
+    @Override
+    public boolean isAppExists(String accessKey) {
+        return baseMapper.lambdaQuery().eq(AppDO::getAccessKey, accessKey).exists();
+    }
+
+    @Override
+    public boolean isAppSecretExpired(String accessKey) {
+        LocalDateTime expireTime = baseMapper.lambdaQuery()
+            .select(AppDO::getExpireTime)
+            .eq(AppDO::getAccessKey, accessKey)
+            .oneOpt()
+            .map(AppDO::getExpireTime)
+            .orElse(null);
+        if (expireTime == null) {
+            return false;
         }
-        AppSecretGetResp appSecretGetResp = new AppSecretGetResp();
-        appSecretGetResp.setAppKey(app.getAppKey());
-        appSecretGetResp.setAppSecret(appSecret);
-        return appSecretGetResp;
+        return expireTime.isBefore(DateUtil.date().toLocalDateTime());
     }
 
-    @Override
-    public void resetAppSecretStatusById(Long id, String status) {
-        baseMapper.lambdaUpdate().set(AppDO::getSecretStatus, status).eq(AppDO::getId, id).update();
-    }
-
-    @Override
-    public void resetAppSecretStatusByAppkey(String appKey, String status) {
-        baseMapper.lambdaUpdate().set(AppDO::getSecretStatus, status).eq(AppDO::getAppKey, appKey).update();
-    }
-
-    @Override
-    public void refreshAppSecretByID(Long id) {
-        baseMapper.lambdaUpdate().set(AppDO::getAppSecret, IdUtil.simpleUUID()).eq(AppDO::getId, id).update();
-        this.resetAppSecretStatusById(id, APP_DISABLED_KEY);
-    }
-
-    @Override
-    public String getAppSecretByAppKey(String appKey) {
-        return baseMapper.lambdaQuery().select(AppDO::getAppSecret).eq(AppDO::getAppKey, appKey).one().getAppSecret();
-    }
-
-    @Override
-    public boolean isExistAppKey(String appKey) {
-        return baseMapper.lambdaQuery().eq(AppDO::getAppKey, appKey).exists();
-    }
-
-    @Override
-    public boolean isExpireAppKey(String appKey) {
-        LocalDateTime expirationTime = baseMapper.lambdaQuery()
-            .select(AppDO::getExpirationTime)
-            .eq(AppDO::getAppKey, appKey)
-            .one()
-            .getExpirationTime();
-        return expirationTime.isBefore(LocalDateTimeUtil.of(DateUtil.date()));
+    /**
+     * 生成密钥
+     *
+     * @return 密钥
+     */
+    private String generateSecret() {
+        return Base64.encode(IdUtil.fastSimpleUUID())
+            .replace(StringConstants.SLASH, StringConstants.EMPTY)
+            .replace("+", StringConstants.EMPTY);
     }
 }
