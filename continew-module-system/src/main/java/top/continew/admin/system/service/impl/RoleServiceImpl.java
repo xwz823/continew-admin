@@ -41,7 +41,7 @@ import top.continew.admin.system.model.resp.MenuResp;
 import top.continew.admin.system.model.resp.RoleDetailResp;
 import top.continew.admin.system.model.resp.RoleResp;
 import top.continew.admin.system.service.*;
-import top.continew.starter.core.util.validate.CheckUtils;
+import top.continew.starter.core.validation.CheckUtils;
 import top.continew.starter.extension.crud.service.impl.BaseServiceImpl;
 
 import java.util.*;

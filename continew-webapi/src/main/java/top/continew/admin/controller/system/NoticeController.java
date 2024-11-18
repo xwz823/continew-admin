@@ -27,7 +27,7 @@ import top.continew.admin.system.model.req.NoticeReq;
 import top.continew.admin.system.model.resp.NoticeDetailResp;
 import top.continew.admin.system.model.resp.NoticeResp;
 import top.continew.admin.system.service.NoticeService;
-import top.continew.starter.core.util.validate.ValidationUtils;
+import top.continew.starter.core.validation.ValidationUtils;
 import top.continew.starter.extension.crud.annotation.CrudRequestMapping;
 import top.continew.starter.extension.crud.controller.BaseController;
 import top.continew.starter.extension.crud.enums.Api;

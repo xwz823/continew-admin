@@ -16,27 +16,25 @@
 
 package top.continew.admin.open.sign;
 
-import cn.dev33.satoken.error.SaErrorCode;
-import cn.dev33.satoken.exception.SaSignException;
 import cn.dev33.satoken.sign.SaSignTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import top.continew.admin.open.service.AppService;
+import top.continew.starter.core.validation.ValidationUtils;
 
 import java.util.Map;
 import java.util.TreeMap;
-
-import static cn.dev33.satoken.SaManager.log;
 
 /**
  * API 参数签名算法
  *
  * @author chengzi
+ * @author Charles7c
  * @since 2024/10/17 16:03
  */
 @Component
 @RequiredArgsConstructor
-public class OpenSignTemplate extends SaSignTemplate {
+public class OpenApiSignTemplate extends SaSignTemplate {
 
     private final AppService appService;
     public static final String ACCESS_KEY = "accessKey";
@@ -49,32 +47,26 @@ public class OpenSignTemplate extends SaSignTemplate {
         String signValue = paramMap.get(sign);
         String accessKeyValue = paramMap.get(ACCESS_KEY);
 
-        // 参数非空校验
-        SaSignException.notEmpty(timestampValue, "缺少 timestamp 字段");
-        SaSignException.notEmpty(nonceValue, "缺少 nonce 字段");
-        SaSignException.notEmpty(signValue, "缺少 sign 字段");
-        SaSignException.notEmpty(accessKeyValue, "缺少 accessKey 字段");
-
-        // 应用存在性校验
-        SaSignException.notTrue(!appService.isAppExists(ACCESS_KEY), "应用不存在");
-
-        // 应用是否过期校验
-        SaSignException.notTrue(appService.isAppSecretExpired(ACCESS_KEY), "应用已过期");
+        // 校验
+        ValidationUtils.throwIfBlank(timestampValue, "timestamp不能为空");
+        ValidationUtils.throwIfBlank(nonceValue, "nonce不能为空");
+        ValidationUtils.throwIfBlank(signValue, "sign不能为空");
+        ValidationUtils.throwIfBlank(accessKeyValue, "accessKey不能为空");
+        ValidationUtils.throwIf(!appService.isAppExists(accessKeyValue), "accessKey非法");
+        ValidationUtils.throwIf(appService.isAppSecretExpired(accessKeyValue), "密钥已过期, 请重置密钥");
 
         // 依次校验三个参数
-        checkTimestamp(Long.parseLong(timestampValue));
-        checkNonce(nonceValue);
-        checkSign(paramMap, signValue);
-
-        // 通过 √
+        super.checkTimestamp(Long.parseLong(timestampValue));
+        super.checkNonce(nonceValue);
+        super.checkSign(paramMap, signValue);
     }
 
     @Override
     public String createSign(Map<String, ?> paramsMap) {
-        // 根据应用密钥获取对应的应用密码
-        String appKey = (String)((Map)paramsMap).get("appkey");
-        String secretKey = this.appService.getSecretKeyByAccessKey(appKey);
-        SaSignException.notEmpty(secretKey, "参与参数签名的秘钥不可为空", SaErrorCode.CODE_12201);
+        // 根据 AK 获取 SK
+        String accessKeyValue = (String)((Map)paramsMap).get(ACCESS_KEY);
+        String secretKey = appService.getSecretKeyByAccessKey(accessKeyValue);
+        ValidationUtils.throwIfBlank(secretKey, "密钥缺失, 请检查应用配置");
 
         // 如果调用者不小心传入了 sign 参数，则此处需要将 sign 参数排除在外
         if (paramsMap.containsKey(sign)) {
@@ -84,15 +76,8 @@ public class OpenSignTemplate extends SaSignTemplate {
         }
 
         // 计算签名
-        String paramsStr = joinParamsDictSort(paramsMap);
+        String paramsStr = super.joinParamsDictSort(paramsMap);
         String fullStr = paramsStr + "&" + key + "=" + secretKey;
-        String signStr = abstractStr(fullStr);
-
-        // 输入日志，方便调试
-        log.debug("fullStr：{}", fullStr);
-        log.debug("signStr：{}", signStr);
-
-        // 返回
-        return signStr;
+        return super.abstractStr(fullStr);
     }
 }

@@ -29,7 +29,7 @@ import top.continew.admin.system.model.resp.MenuResp;
 import top.continew.admin.system.service.MenuService;
 import top.continew.starter.core.constant.StringConstants;
 import top.continew.starter.core.util.URLUtils;
-import top.continew.starter.core.util.validate.ValidationUtils;
+import top.continew.starter.core.validation.ValidationUtils;
 import top.continew.starter.extension.crud.annotation.CrudRequestMapping;
 import top.continew.starter.extension.crud.controller.BaseController;
 import top.continew.starter.extension.crud.enums.Api;

@@ -31,6 +31,7 @@ import top.continew.admin.open.model.resp.AppResp;
 import top.continew.admin.open.model.resp.AppSecretResp;
 import top.continew.admin.open.service.AppService;
 import top.continew.starter.core.constant.StringConstants;
+import top.continew.starter.core.validation.ValidationUtils;
 import top.continew.starter.extension.crud.service.impl.BaseServiceImpl;
 
 import java.util.Optional;
@@ -50,7 +51,7 @@ public class AppServiceImpl extends BaseServiceImpl<AppMapper, AppDO, AppResp, A
     public void beforeAdd(AppReq req) {
         req.setAccessKey(Base64.encode(IdUtil.fastSimpleUUID())
             .replace(StringConstants.SLASH, StringConstants.EMPTY)
-            .replace("+", StringConstants.EMPTY)
+            .replace(StringConstants.PLUS, StringConstants.EMPTY)
             .substring(0, 30));
         req.setSecretKey(this.generateSecret());
     }
@@ -100,6 +101,6 @@ public class AppServiceImpl extends BaseServiceImpl<AppMapper, AppDO, AppResp, A
     private String generateSecret() {
         return Base64.encode(IdUtil.fastSimpleUUID())
             .replace(StringConstants.SLASH, StringConstants.EMPTY)
-            .replace("+", StringConstants.EMPTY);
+            .replace(StringConstants.PLUS, StringConstants.EMPTY);
     }
 }

@@ -31,7 +31,7 @@ import top.continew.admin.system.model.resp.DeptResp;
 import top.continew.admin.system.service.DeptService;
 import top.continew.admin.system.service.RoleDeptService;
 import top.continew.admin.system.service.UserService;
-import top.continew.starter.core.util.validate.CheckUtils;
+import top.continew.starter.core.validation.CheckUtils;
 import top.continew.starter.data.core.enums.DatabaseType;
 import top.continew.starter.data.core.util.MetaUtils;
 import top.continew.starter.extension.crud.service.impl.BaseServiceImpl;

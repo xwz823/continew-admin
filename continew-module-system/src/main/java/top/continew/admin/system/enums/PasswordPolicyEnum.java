@@ -29,7 +29,7 @@ import top.continew.admin.common.constant.SysConstants;
 import top.continew.admin.system.model.entity.UserDO;
 import top.continew.admin.system.service.OptionService;
 import top.continew.admin.system.service.UserPasswordHistoryService;
-import top.continew.starter.core.util.validate.ValidationUtils;
+import top.continew.starter.core.validation.ValidationUtils;
 
 import java.util.Map;
 

@@ -42,7 +42,7 @@ import top.continew.admin.system.model.resp.user.UserImportResp;
 import top.continew.admin.system.model.resp.user.UserResp;
 import top.continew.admin.system.service.UserService;
 import top.continew.starter.core.util.ExceptionUtils;
-import top.continew.starter.core.util.validate.ValidationUtils;
+import top.continew.starter.core.validation.ValidationUtils;
 import top.continew.starter.extension.crud.annotation.CrudRequestMapping;
 import top.continew.starter.extension.crud.controller.BaseController;
 import top.continew.starter.extension.crud.enums.Api;

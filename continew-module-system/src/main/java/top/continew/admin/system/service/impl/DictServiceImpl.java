@@ -25,7 +25,7 @@ import top.continew.admin.system.model.req.DictReq;
 import top.continew.admin.system.model.resp.DictResp;
 import top.continew.admin.system.service.DictItemService;
 import top.continew.admin.system.service.DictService;
-import top.continew.starter.core.util.validate.CheckUtils;
+import top.continew.starter.core.validation.CheckUtils;
 import top.continew.starter.extension.crud.model.resp.LabelValueResp;
 import top.continew.starter.extension.crud.service.impl.BaseServiceImpl;
 
