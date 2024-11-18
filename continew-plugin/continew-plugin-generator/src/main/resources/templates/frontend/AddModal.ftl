@@ -41,6 +41,10 @@ const options: Options = {
   btns: { hide: true },
 }
 
+const { form, resetForm } = useForm({
+  // todo 待补充
+})
+
 const columns: Columns = reactive([
 <#list fieldConfigs as fieldConfig>
   <#if fieldConfig.showInForm>
@@ -80,10 +84,6 @@ const columns: Columns = reactive([
   </#if>
 </#list>
 ])
-
-const { form, resetForm } = useForm({
-  // todo 待补充
-})
 
 // 重置
 const reset = () => {

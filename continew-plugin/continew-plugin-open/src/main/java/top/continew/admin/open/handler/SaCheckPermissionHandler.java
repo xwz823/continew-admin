@@ -41,7 +41,7 @@ public class SaCheckPermissionHandler implements SaAnnotationHandlerInterface<Sa
 
     @Override
     public void checkMethod(SaCheckPermission at, Method method) {
-        if (!ApiSignCheckUtils.isExistSignParam()) {
+        if (!ApiSignCheckUtils.isSignParamExists()) {
             _checkMethod(at.type(), at.value(), at.mode(), at.orRole());
         }
     }

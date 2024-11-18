@@ -33,7 +33,7 @@ import top.continew.admin.open.service.AppService;
 import top.continew.starter.core.constant.StringConstants;
 import top.continew.starter.extension.crud.service.impl.BaseServiceImpl;
 
-import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * 应用业务实现
@@ -74,31 +74,22 @@ public class AppServiceImpl extends BaseServiceImpl<AppMapper, AppDO, AppResp, A
 
     @Override
     public String getSecretKeyByAccessKey(String accessKey) {
-        return baseMapper.lambdaQuery()
-            .select(AppDO::getSecretKey)
-            .eq(AppDO::getAccessKey, accessKey)
-            .oneOpt()
-            .map(AppDO::getSecretKey)
-            .orElse(null);
+        return Optional.ofNullable(baseMapper.selectByAccessKey(accessKey)).map(AppDO::getSecretKey).orElse(null);
     }
 
     @Override
     public boolean isAppExists(String accessKey) {
-        return baseMapper.lambdaQuery().eq(AppDO::getAccessKey, accessKey).exists();
+        return baseMapper.selectByAccessKey(accessKey) != null;
     }
 
     @Override
     public boolean isAppSecretExpired(String accessKey) {
-        LocalDateTime expireTime = baseMapper.lambdaQuery()
-            .select(AppDO::getExpireTime)
-            .eq(AppDO::getAccessKey, accessKey)
-            .oneOpt()
-            .map(AppDO::getExpireTime)
-            .orElse(null);
-        if (expireTime == null) {
+        AppDO app = baseMapper.selectByAccessKey(accessKey);
+        ValidationUtils.throwIfNull(app, "应用不存在");
+        if (app.getExpireTime() == null) {
             return false;
         }
-        return expireTime.isBefore(DateUtil.date().toLocalDateTime());
+        return app.getExpireTime().isBefore(DateUtil.date().toLocalDateTime());
     }
 
     /**
