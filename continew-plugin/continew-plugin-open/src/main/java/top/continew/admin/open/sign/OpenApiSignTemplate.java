@@ -19,11 +19,12 @@ package top.continew.admin.open.sign;
 import cn.dev33.satoken.sign.SaSignTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import top.continew.admin.common.enums.DisEnableStatusEnum;
+import top.continew.admin.open.model.entity.AppDO;
 import top.continew.admin.open.service.AppService;
 import top.continew.starter.core.validation.ValidationUtils;
 
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * API 参数签名算法
@@ -52,32 +53,24 @@ public class OpenApiSignTemplate extends SaSignTemplate {
         ValidationUtils.throwIfBlank(nonceValue, "nonce不能为空");
         ValidationUtils.throwIfBlank(signValue, "sign不能为空");
         ValidationUtils.throwIfBlank(accessKeyValue, "accessKey不能为空");
-        ValidationUtils.throwIf(!appService.isAppExists(accessKeyValue), "accessKey非法");
-        ValidationUtils.throwIf(appService.isAppSecretExpired(accessKeyValue), "密钥已过期, 请重置密钥");
+        AppDO app = appService.getByAccessKey(accessKeyValue);
+        ValidationUtils.throwIfNull(app, "accessKey非法");
+        ValidationUtils.throwIfEqual(DisEnableStatusEnum.DISABLE, app.getStatus(), "应用已被禁用, 请联系管理员");
+        ValidationUtils.throwIf(app.isExpired(), "应用已过期, 请联系管理员");
 
         // 依次校验三个参数
         super.checkTimestamp(Long.parseLong(timestampValue));
         super.checkNonce(nonceValue);
+        paramMap.put(key, app.getSecretKey());
         super.checkSign(paramMap, signValue);
     }
 
     @Override
-    public String createSign(Map<String, ?> paramsMap) {
-        // 根据 AK 获取 SK
-        String accessKeyValue = (String)((Map)paramsMap).get(ACCESS_KEY);
-        String secretKey = appService.getSecretKeyByAccessKey(accessKeyValue);
-        ValidationUtils.throwIfBlank(secretKey, "密钥缺失, 请检查应用配置");
-
-        // 如果调用者不小心传入了 sign 参数，则此处需要将 sign 参数排除在外
-        if (paramsMap.containsKey(sign)) {
-            // 为了保证不影响原有的 paramsMap，此处需要再复制一份
-            paramsMap = new TreeMap<>(paramsMap);
-            paramsMap.remove(sign);
-        }
-
+    public String createSign(Map<String, ?> paramMap) {
+        ValidationUtils.throwIfEmpty(paramMap.get(key), "秘钥缺失, 请检查应用配置");
+        // 移除 sign 参数
+        paramMap.remove(sign);
         // 计算签名
-        String paramsStr = super.joinParamsDictSort(paramsMap);
-        String fullStr = paramsStr + "&" + key + "=" + secretKey;
-        return super.abstractStr(fullStr);
+        return super.abstractStr(super.joinParamsDictSort(paramMap));
     }
 }

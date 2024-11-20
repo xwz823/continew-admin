@@ -16,6 +16,7 @@
 
 package top.continew.admin.open.service;
 
+import top.continew.admin.open.model.entity.AppDO;
 import top.continew.admin.open.model.query.AppQuery;
 import top.continew.admin.open.model.req.AppReq;
 import top.continew.admin.open.model.resp.AppDetailResp;
@@ -48,26 +49,10 @@ public interface AppService extends BaseService<AppResp, AppDetailResp, AppQuery
     void resetSecret(Long id);
 
     /**
-     * 根据 Access Key 获取 Secret Key
+     * 根据 Access Key 查询
      *
      * @param accessKey Access Key
-     * @return Secret Key
+     * @return 应用信息
      */
-    String getSecretKeyByAccessKey(String accessKey);
-
-    /**
-     * 判断应用是否存在
-     *
-     * @param accessKey Access Key
-     * @return 是否存在（true：存在；false：不存在）
-     */
-    boolean isAppExists(String accessKey);
-
-    /**
-     * 判断应用密钥是否过期
-     *
-     * @param accessKey Access Key
-     * @return 是否过期（true：已过期；false：未过期）
-     */
-    boolean isAppSecretExpired(String accessKey);
+    AppDO getByAccessKey(String accessKey);
 }

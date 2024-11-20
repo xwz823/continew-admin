@@ -23,14 +23,15 @@ import cn.dev33.satoken.sign.SaSignTemplate;
 import java.util.List;
 
 /**
- * API签名验证工具类
+ * Open Api 工具类
  *
  * @author chengzi
+ * @author Charles7c
  * @since 2024/10/25 15:31
  */
-public class ApiSignCheckUtils {
+public class OpenApiUtils {
 
-    private ApiSignCheckUtils() {
+    private OpenApiUtils() {
     }
 
     /**

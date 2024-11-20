@@ -45,6 +45,6 @@ public class AppSecretResp implements Serializable {
     /**
      * Secret Key（私有密钥）
      */
-    @Schema(description = "Secret Key（私有密钥）", example = "")
+    @Schema(description = "Secret Key（私有密钥）", example = "MDI2YzQ3YTU1NGEyNDM1ZWIwNTU5NmNjNmZjM2M2Nzg=")
     private String secretKey;
 }

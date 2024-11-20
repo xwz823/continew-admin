@@ -70,4 +70,16 @@ public class AppDO extends BaseDO {
      * 状态
      */
     private DisEnableStatusEnum status;
+
+    /**
+     * 是否已过期
+     *
+     * @return true：已过期；false：未过期
+     */
+    public boolean isExpired() {
+        if (expireTime == null) {
+            return false;
+        }
+        return LocalDateTime.now().isAfter(expireTime);
+    }
 }
