@@ -96,12 +96,15 @@ springdoc:
     - group: monitor
       display-name: 系统监控
       packages-to-scan: ${project.base-package}.controller.monitor
-    - group: code
-      display-name: 代码生成
-      packages-to-scan: ${project.base-package}.controller.code
     - group: schedule
       display-name: 任务调度
       packages-to-scan: ${project.base-package}.controller.schedule
+    - group: open
+      display-name: 能力开放
+      packages-to-scan: ${project.base-package}.controller.open
+    - group: code
+      display-name: 代码生成
+      packages-to-scan: ${project.base-package}.controller.code
   ## 组件配置
   components:
     # 鉴权配置
