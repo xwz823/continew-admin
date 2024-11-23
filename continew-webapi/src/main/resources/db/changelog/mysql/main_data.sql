@@ -89,12 +89,7 @@ VALUES
 (2020, '系统日志', 2000, 2, '/monitor/log', 'MonitorLog', 'monitor/log/index', NULL, 'history', b'0', b'0', b'0', NULL, 2, 1, 1, NOW(), NULL, NULL),
 (2021, '列表', 2020, 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'monitor:log:list', 1, 1, 1, NOW(), NULL, NULL),
 (2022, '详情', 2020, 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'monitor:log:detail', 2, 1, 1, NOW(), NULL, NULL),
-(2023, '导出', 2020, 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'monitor:log:export', 3, 1, 1, NOW(), NULL, NULL),
-
-(10000, '关于项目', 0, 1, '/project', 'Project', 'Layout', NULL, 'apps', b'0', b'0', b'0', NULL, 999, 1, 1, NOW(), NULL, NULL),
-(10001, '接口文档', 10000, 2, 'https://api.continew.top/doc.html', NULL, NULL, NULL, 'code-square', b'1', b'0', b'0', NULL, 1, 1, 1, NOW(), NULL, NULL),
-(10002, 'Gitee', 10000, 2, 'https://gitee.com/continew/continew-admin', NULL, NULL, NULL, 'gitee', b'1', b'0', b'0', NULL, 2, 1, 1, NOW(), NULL, NULL),
-(10003, 'GitHub', 10000, 2, 'https://github.com/continew-org/continew-admin', NULL, NULL, NULL, 'github', b'1', b'0', b'0', NULL, 3, 1, 1, NOW(), NULL, NULL);
+(2023, '导出', 2020, 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'monitor:log:export', 3, 1, 1, NOW(), NULL, NULL);
 
 -- 初始化默认部门
 INSERT INTO `sys_dept`
