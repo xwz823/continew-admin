@@ -18,7 +18,6 @@ package top.continew.admin.generator.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -157,7 +156,7 @@ public class GeneratorServiceImpl implements GeneratorService {
             // 更新已有字段配置
             if (null != fieldConfig.getCreateTime()) {
                 fieldConfig.setColumnType(column.getTypeName());
-                fieldConfig.setColumnSize(Convert.toStr(column.getSize()));
+                fieldConfig.setColumnSize(column.getSize());
             }
             String fieldType = typeMappingEntrySet.stream()
                 .filter(entry -> entry.getValue().contains(fieldConfig.getColumnType()))

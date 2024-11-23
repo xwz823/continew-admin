@@ -18,7 +18,7 @@ import { Message } from '@arco-design/web-vue'
 import { useWindowSize } from '@vueuse/core'
 import { get${classNamePrefix}, add${classNamePrefix}, update${classNamePrefix} } from '@/apis/${apiModuleName}/${apiName}'
 import { type Columns, GiForm, type Options } from '@/components/GiForm'
-import { useForm } from '@/hooks'
+import { useResetReactive } from '@/hooks'
 import { useDict } from '@/hooks/app'
 
 const emit = defineEmits<{
@@ -41,7 +41,7 @@ const options: Options = {
   btns: { hide: true },
 }
 
-const { form, resetForm } = useForm({
+const [form, resetForm] = useResetReactive({
   // todo 待补充
 })
 
