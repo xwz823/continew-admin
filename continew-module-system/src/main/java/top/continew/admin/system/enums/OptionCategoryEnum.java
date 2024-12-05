@@ -40,7 +40,7 @@ public enum OptionCategoryEnum {
     MAIL,
 
     /**
-     * 验证码配置
+     * 登录配置
      */
-    CAPTCHA,
+    LOGIN,
 }
