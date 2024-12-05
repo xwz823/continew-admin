@@ -69,11 +69,13 @@ public class AuthController {
     @Operation(summary = "账号登录", description = "根据账号和密码进行登录认证")
     @PostMapping("/account")
     public LoginResp accountLogin(@Validated @RequestBody AccountLoginReq loginReq, HttpServletRequest request) {
-        String captchaKey = CacheConstants.CAPTCHA_KEY_PREFIX + loginReq.getUuid();
-        String captcha = RedisUtils.get(captchaKey);
-        ValidationUtils.throwIfBlank(captcha, CAPTCHA_EXPIRED);
-        RedisUtils.delete(captchaKey);
-        ValidationUtils.throwIfNotEqualIgnoreCase(loginReq.getCaptcha(), captcha, CAPTCHA_ERROR);
+        if (!loginReq.getUnCaptcha()) {
+            String captchaKey = CacheConstants.CAPTCHA_KEY_PREFIX + loginReq.getUuid();
+            String captcha = RedisUtils.get(captchaKey);
+            ValidationUtils.throwIfBlank(captcha, CAPTCHA_EXPIRED);
+            RedisUtils.delete(captchaKey);
+            ValidationUtils.throwIfNotEqualIgnoreCase(loginReq.getCaptcha(), captcha, CAPTCHA_ERROR);
+        }
         // 用户登录
         String rawPassword = ExceptionUtils.exToNull(() -> SecureUtils.decryptByRsaPrivateKey(loginReq.getPassword()));
         ValidationUtils.throwIfBlank(rawPassword, "密码解密失败");
